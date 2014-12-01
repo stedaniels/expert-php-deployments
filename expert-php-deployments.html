@@ -1,0 +1,1718 @@
+
+<!doctype html>
+<html>
+    <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width initial-scale=1" />
+    <meta name="description" content="">
+    <meta name="generator" content="Jekyll 2.4.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Expert PHP Deployments &middot; Vic Cherubini</title>
+
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="canonical" href="http://leftnode.org/posts/expert-php-deployments.html">
+</head>
+
+<body>
+    <div id="stage">
+        <header>
+    <h1>Vic Cherubini</h1>
+    <h2 class="subheader">
+        <a href="/">Home</a> &middot;
+        <a href="/posts.html">Posts</a> &middot;
+        <a href="/posts/expert-php-deployments.html">Expert PHP Deployments</a> &middot;
+        <a href="https://twitter.com/leftnode">@leftnode</a> &middot;
+        <a href="https://github.com/leftnode">Projects</a> &middot;
+        <a href="/feed.xml">RSS</a>
+    </h2>
+</header>
+
+
+        <div id="content">
+            <div class="post">
+    <h2>Expert PHP Deployments</h2>
+    <p class="publish-date">
+        Nov 29, 2014
+    </p>
+
+    <article>
+        <p>In 2013 I wrote and self-published a book titled “Expert PHP Deployments”. While it was not a smashing success, it sold enough copies to pay for itself, and I was happy to have a published book to my name.</p>
+
+<p>Unfortunately, I have not had time to market it, update it, or further improve it, so I am giving it away for free. You can read the book in its entirety below.</p>
+
+<h1 id="introduction">1. Introduction</h1>
+
+<p>Thank you for reading <em>Expert PHP Deployments</em>! You are reading this book because you want to learn how to deploy any PHP application correctly. This book will cover how to build a competent development environment using Vagrant, how to securely set up a Linux server from scratch, and how to deploy your application using Phing and Capistrano.</p>
+
+<h2 id="objectives">Objectives</h2>
+<p>There are many ways to handle deployments. My goal with this book is to teach you general, production ready, well-tested set of procedures and tools that can deploy any PHP application with no downtime.</p>
+
+<h2 id="motivating-factors">Motivating Factors</h2>
+<p>Each chapter of this book will include motivating factors - why you are doing what you are doing - and my philosophy behind the motivating factors. My philosophy is exactly that - mine. You are certainly entitled to disagree with it, and I encourage all discussion around web development best practices in order to further the state of the art.</p>
+
+<p>It is my hope that you love programming as much as I do, and that by the conclusion of this book you will be a more well-rounded and educated software engineer.</p>
+
+<h2 id="about-me">About Me</h2>
+<p>My name is Vic Cherubini and I have been programming for the web since 1999. I was fortunate to grow up in an environment that fostered a passion for computers: my father owns a software company in Houston, TX. I was thirteen years old when the web really started to become popular in 1997 and I spent countless hours at my father’s office bugging the other developers to teach me HTML.</p>
+
+<p>In 1999 I finally picked up some Perl, and quickly moved into learning PHP. Understanding PHP opened up a whole new world of opportunities for me. Finally, I had an easy to understand programming language that could connect to a database! It was quite earth shattering.</p>
+
+<p>The last fourteen years have taught me a lot. I consider myself an expert level developer, and my goal with this book is to make you a better programmer. As for my official credentials, I have a Bachelors of Science in Computer Science from the University of Texas at Dallas. I started programming PHP in 1999 and have had a job doing that in one form or another since then.</p>
+
+<p>I currently live in Dallas, TX and run a small software consulting company - <a href="http://brightmarch.com">Bright March</a> - fulltime. We have built a variety of web applications almost entirely using the popular PHP framework Symfony. However, I certainly have plenty of experience deploying a wide variety of non-standard PHP applications. I have helped author other technical books in the past; this is the first commercial book I have authored entirely - with plenty of help.</p>
+
+<p>It is my sincere hope that you are able to take what you learn from this book and translate it directly to your day to day work life.</p>
+
+<h2 id="about-you">About You</h2>
+<p>This book is aimed at the PHP programmer that wants to learn a great way for deploying PHP applications. You should have a solid grasp on PHP already. You should be relatively comfortable from the command line, and I highly recommend you have a Unix based computer to work on (however, we will be using Vagrant to create a normalized development environment).</p>
+
+<p>You can read this book at any level: beginner, intermediate, or advanced programmer. If you are an advanced programmer, some information might be already known to you. I find it helpful to read things I (think I) already know because often I learn new pieces of information in the process.</p>
+
+<p>Additionally, you will get a lot out of this book regardless of the size of the application you are working on. You can incorporate the tools discussed at any stage of your application. The techniques taught in this book will work for established software like Wordpress, Joomla, Expression Engine, or Drupal. </p>
+
+<h2 id="helper-repository">Helper Repository</h2>
+<p>The primary goal of this book is to teach you new tools and techniques. Because it is impossible to cover every possible configuration strategy, you are expected to be able to adjust the techniques taught in here to your own application.</p>
+
+<p>I have set up a sample repository on GitHub to properly teach the tools and techniques outlined in this book.</p>
+
+<p><a href="https://github.com/leftnode/expert-php-deployments">Expert PHP Deployments Repository</a></p>
+
+<p>We will be using this repository throughout the book to reference code and configuration samples. It will be referred to as the “Expert PHP Deployments Application”. All of the configuration files necessary for building your development and production environments are included in the repository. All configuration files not needed explicitly for development purposes for the application can be found in the <code>app/server</code> directory within the repository.</p>
+
+<blockquote>
+  <p>For example, the <code>Vagrantfile</code> file can be found in the root of the repository because that is where it belongs and it is necessary for development, whereas the configuration settings for iptables can be found in the <code>app/server</code> directory because those are not needed for development purposes and only used for configuring the production server.</p>
+</blockquote>
+
+<p>Run the following command to clone the repository onto your computer.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone git@github.com:leftnode/expert-php-deployments.git</code></pre></div>
+
+<p>I recommend you fork the repository to your own personal GitHub account so you can experiment on it as much as you like.</p>
+
+<blockquote>
+  <p>Obviously you need to have Git installed on your computer. Please refer to <a href="http://git-scm.com/">the Git website</a> on instructions on how to install it on your computer.</p>
+</blockquote>
+
+<p>You are expected to be able to use this repository to follow along throughout the book and to use the samples it provides to get your application ready for deployment. For example, when learning how to use Vagrant and Capistrano, the book will instruct you to run specific commands within your own personal repository to get started. You can use the Expert PHP Deployments Application repository to guide yourself. In other areas, the Expert PHP Deployments Application repository will hold the configuration files you will need to use.</p>
+
+<p>Finally, I am referring to your own application when I refer to “your repository” or “your application”, not the Expert PHP Deployments Application repository.</p>
+
+<h2 id="in-this-chapter">In This Chapter</h2>
+<p>In this chapter, I discussed my background and why I am writing this book. I also hope that I got you excited about efficiently deploying your PHP applications.</p>
+
+<p>Before we jump into deploying a complete PHP application, I want to spend some time discussing a competent development environment for your entire team.</p>
+
+<h1 id="configuring-your-environment">2. Configuring Your Environment</h1>
+
+<p>It is time to get started! The very first thing we must do is to ensure you have a competent environment to develop in.</p>
+
+<p>To do this, we are going to use a piece of software named Vagrant to normalize your environment and my environment. This way, we guarantee they are identical and issues of “it works on my machine!” will be minimized.</p>
+
+<p>Vagrant is a simple yet incredibly useful piece of software. Essentially, it is a command line wrapper to a virtual machine hypervisor (VirtualBox by default) and it allows you to provision a new virtual machine with a pre-configured list of software very easily.</p>
+
+<p>Vagrant has completely changed how we work at Bright March. Previously, using a combination of Homebrew and hand compiled software, I would configure my computer and then try to get Neil, my co-founder, to do the same - usually with dismal results. Some library or binary would always end up missing or incorrect.</p>
+
+<p>However, with Vagrant, I was able to write a shell script that completely provisioned a virtual machine for us. That script is stored as part of the configuration files for the project we are working on. With a single command, we can both launch an identical virtual machine ready for development.</p>
+
+<h2 id="objectives-1">Objectives</h2>
+<p>At the end of this chapter, you will know how to use Vagrant to set up a development environment.</p>
+
+<h2 id="motivating-factors-1">Motivating Factors</h2>
+<p>Creating a normalized development environment is crucial for development on a team of programmers and Vagrant is a perfect tool for that task.</p>
+
+<h2 id="installing-vagrant">Installing Vagrant</h2>
+<p>Installing Vagrant is a very easy and straightforward process regardless of your environment. However, before you install Vagrant you will need to install VirtualBox first. VirtualBox is a virtual machine hypervisor; it provisions and manages the actual virtual machines. Many people use VirtualBox from a GUI and do not realize the GUI is simply a nice wrapper for several command line utilities. Vagrant takes advantage of these utilities and provides a nice command line interface for them.</p>
+
+<p>To install VirtualBox, navigate to <a href="https://www.virtualbox.org">https://www.virtualbox.org</a> and install the binary appropriate for your host system. This book will use VirtualBox 4.3.2.</p>
+
+<p>Installing Vagrant is equally as simple as installing VirtualBox. To install Vagrant, navigate to <a href="http://downloads.vagrantup.com">http://downloads.vagrantup.com</a> and install the latest available version for your operating system. This book will use Vagrant 1.3.5.</p>
+
+<p>You are now ready to create a virtual machine using Vagrant.</p>
+
+<h3 id="bootstrapping-with-vagrant">Bootstrapping With Vagrant</h3>
+<p>You are now ready to use Vagrant to bootstrap your development environment. To keep things simple, we will use a 64bit version of Ubuntu 12.04 LTS. Vagrant does a wonderful job of providing a pre-built virtual machine image for you, and installing it is extremely simple. LTS - long term support - versions of Ubuntu are preferred for server operating systems because they are officially supported for five years by Canonical.</p>
+
+<p>The three commands you will use most often with Vagrant are: <code>vagrant up</code>, <code>vagrant ssh</code>, and <code>vagrant halt</code>. The command <code>vagrant up</code> provisions your virtual machine and brings it up. <code>vagrant ssh</code> allows you to SSH into your virtual machine. Finally, <code>vagrant halt</code> completely halts and shuts down your virtual machine, but leaves its hard-disk in-tact for when you bring the virtual machine back up.</p>
+
+<p>Vagrant provides other commands to destroy, suspend, and resume your virtual machine. I have found the three outlined above to be the most useful.</p>
+
+<blockquote>
+  <p>From time to time, I will completely destroy a virtual machine. Moving the physical location of your repository on your hard drive is one reason to do this.</p>
+</blockquote>
+
+<p>Run the following command in the root of the Expert PHP Deployments Application repository to bootstrap the virtual machine.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">vagrant up</code></pre></div>
+
+<p>Because this is the first time you ran Vagrant, the actual virtual machine image will be downloaded for you. This may take a few minutes.</p>
+
+<p>Vagrant can intelligently determine where the <code>Vagrantfile</code> is located, but it is easiest to execute all of the Vagrant commands in the same directory it is located in.</p>
+
+<h3 id="vagrantfile"><code>Vagrantfile</code></h3>
+<p>The <code>Vagrantfile</code> file is a configuration script written in Ruby and tells Vagrant how to provision and build your virtual machine. The default <code>Vagrantfile</code> is made up almost entirely of comments.</p>
+
+<p>I generally keep the comments in the <code>Vagrantfile</code> for each of my projects, but you are welcome to remove them. However, they are maintained in the actual source code that accompanies the book itself.</p>
+
+<p>The next four sections of this chapter will go through the <code>Vagrantfile</code> file line by line to explain how everything works.</p>
+
+<h4 id="virtual-machine-details">Virtual Machine Details</h4>
+<p>First, we begin by telling Vagrant to use the <code>precise64</code> virtual machine image. By setting the <code>config.vm.box_url</code>, Vagrant will download the image if does not already exist on your host machine.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;precise64&quot;</span>
+<span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box_url</span> <span class="o">=</span> <span class="s2">&quot;http://files.vagrantup.com/precise64.box&quot;</span></code></pre></div>
+
+<blockquote>
+  <p>The codename for Ubuntu 12.04 is Precise Pangolin, which is why the virtual machine image is named <code>precise64</code> - Precise Pangolin 64bit.</p>
+</blockquote>
+
+<p>Next, we tell Vagrant how to provision this virtual machine by pointing to a shell script we will write. This shell script will bootstrap the entire environment necessary for developing your application.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="ss">:shell</span><span class="p">,</span> <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s2">&quot;app/config/vagrant-bootstrap.sh&quot;</span></code></pre></div>
+
+<p>Vagrant supports using Chef and Puppet to provision your virtual machine as well. I highly recommend you learn how to build it from scratch (from source), and then move on to more abstract topics like Chef or Puppet.</p>
+
+<h4 id="port-forwarding">Port Forwarding</h4>
+<p>Next, we must forward a port for your host machine to use. Forwarding a port is important so you can use the built-in PHP server for development. It should never be used in a production environment. By default, it runs on port 8000 so we forward that port to our host machine.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="ss">:forwarded_port</span><span class="p">,</span> <span class="ss">guest</span><span class="p">:</span> <span class="mi">8000</span><span class="p">,</span> <span class="ss">host</span><span class="p">:</span> <span class="mi">8000</span><span class="p">,</span> <span class="ss">auto_correct</span><span class="p">:</span> <span class="kp">true</span></code></pre></div>
+
+<h4 id="synced-directories">Synced Directories</h4>
+<p>One incredibly useful feature of Vagrant is its ability to manage multiple synced directories against the host and guest operating systems. These directories are transparent, meaning if you create a file while on the virtual machine, the file will exist on the host machine as well.</p>
+
+<p>Syncing many files at once with the VM can take a lot of time - sometimes several seconds on slower host machines. Some larger frameworks like Symfony and Doctrine create many cache files on each request. This means each request to the virtual machine can take several seconds, which makes development agonizing. To get around this issue, we use NFS - network file system - to sync the files. The only downside to using NFS is that from time to time, it will take longer than a few milliseconds to sync the files. In fact, sometimes you can refresh your application in the browser before the files have been copied over. However, the speed gains you achieve from NFS are worth the few additional millisecond wait. Giving your application a second refresh if it fails after modifying some files usually fixes the issue.</p>
+
+<p>To use NFS, you must assign a private IP address to the virtual machine. You may have to change the IP address above to work with your home or work router. Additionally, Vagrant will require sudo access when provisioning your virtual machine so be prepared to enter your password.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="ss">:private_network</span><span class="p">,</span> <span class="ss">ip</span><span class="p">:</span> <span class="s2">&quot;192.168.100.100&quot;</span></code></pre></div>
+
+<p>After assigning a private IP address to our virtual machine, we tell it to enable SSH agent forwarding. SSH agent forwarding will allow your virtual machine to use the host machines private key for deployments with Capistrano.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">config</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">forward_agent</span> <span class="o">=</span> <span class="kp">true</span></code></pre></div>
+
+<p>Now that Vagrant knows to assign a private IP to the virtual machine, we also want to automatically create a synced directory when the virtual machine is provisioned. Vagrant will use NFS to sync files to this directory as well.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">synced_folder</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;/var/apps/expert-php-deployments&quot;</span><span class="p">,</span> <span class="ss">:nfs</span> <span class="o">=&gt;</span> <span class="kp">true</span></code></pre></div>
+
+<h4 id="virtual-machine-optimizations">Virtual Machine Optimizations</h4>
+<p>And finally, we tell Vagrant to pass some additional command line parameters to the headless version of VirtualBox.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="s2">&quot;virtualbox&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span>
+  <span class="n">v</span><span class="o">.</span><span class="n">customize</span> <span class="o">[</span><span class="s2">&quot;modifyvm&quot;</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;--memory&quot;</span><span class="p">,</span> <span class="s2">&quot;1024&quot;</span><span class="o">]</span>
+  <span class="n">v</span><span class="o">.</span><span class="n">customize</span> <span class="o">[</span><span class="s2">&quot;modifyvm&quot;</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;--cpus&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="o">]</span>
+  <span class="n">v</span><span class="o">.</span><span class="n">customize</span> <span class="o">[</span><span class="s2">&quot;modifyvm&quot;</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;--cpuexecutioncap&quot;</span><span class="p">,</span> <span class="s2">&quot;100&quot;</span><span class="o">]</span>
+  <span class="n">v</span><span class="o">.</span><span class="n">customize</span> <span class="o">[</span><span class="s2">&quot;modifyvm&quot;</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="s2">&quot;--hwvirtex&quot;</span><span class="p">,</span> <span class="s2">&quot;on&quot;</span><span class="o">]</span>
+<span class="k">end</span></code></pre></div>
+
+<ul>
+  <li><code>memory</code>: Sets the memory to 1024MB.</li>
+  <li><code>cpus</code>: Gives the virtual machine eight processors.</li>
+  <li><code>cpuexecutioncap</code>: Allows the virtual machine CPUs to use 100% of the available resources if necessary.</li>
+  <li><code>hwvirtex</code>: Enables “hardware virtualization extensions” which will use specific extensions built into your hardware to speed up the virtual machine.</li>
+</ul>
+
+<blockquote>
+  <p>These are my default settings for an 8-core 16GB RAM MacBook Pro. You can adjust your settings accordingly for your machine.</p>
+</blockquote>
+
+<h3 id="vagrant-bootstrapsh"><code>vagrant-bootstrap.sh</code></h3>
+<p>Before you can fully provision your virtual machine, we need to tell Vagrant how to build it. The bootstrap file is located at <code>app/config/vagrant-bootstrap.sh</code> as specified in the <code>Vagrantfile</code> file.</p>
+
+<p>This is a shell script that builds your virtual machine from scratch. It installs the necessary libraries needed, and then goes on to compile Ruby, PostgreSQL, Redis, and PHP from source.</p>
+
+<blockquote>
+  <p>My general philosophy of server administration is that you install libraries from your Linux distributions package manager and compile your vital applications from source. For example, <code>libxml2</code> is installed from Aptitude, but PHP is compiled from source. Essential libraries are more likely to be very stable, so trusting the maintainers is easy. By installing essential packages from source, you have greater control over the upgrade paths on your production systems.</p>
+</blockquote>
+
+<p>Understanding how this file works is important because it will be the basis for how we provision our production server. The next ten sections and sub-sections will explain how this script bootstraps your virtual machine.</p>
+
+<h4 id="no-redundant-provisioning">No Redundant Provisioning</h4>
+<p>The very first thing we want to check when bringing up a virtual machine is if it has already been provisioned. If it is, we do not want to provision it again. As the comment states, you can run the command vagrant up <code>--no-provision</code> to bring up the virtual machine without provisioning it. However, if you accidentally leave off the <code>--no-provision</code> argument flag, the machine will be provisioned. Thus, this initial check prevents that from happening.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">VAGRANT_PROVISIONED</span><span class="o">=</span>/etc/vagrant-provisioned
+
+<span class="k">if</span> <span class="o">[</span> -e <span class="nv">$VAGRANT_PROVISIONED</span> <span class="o">]</span>
+<span class="k">then</span>
+    <span class="nb">exit </span>0
+<span class="k">fi</span></code></pre></div>
+
+<h4 id="databases">Databases</h4>
+<p>The bootstrap process also creates a database and eponymous user for easier development. Larger projects with large test suites may opt to create a test version of their database. Automated tests can run against the test database, and front end testing can use the regular development database.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">DBUSER</span><span class="o">=</span><span class="s2">&quot;expert_php_deployments&quot;</span>
+<span class="nv">DBNAME</span><span class="o">=</span><span class="s2">&quot;expert_php_deployments&quot;</span></code></pre></div>
+
+<blockquote>
+  <p>I switched from MySQL to PostgreSQL completely in 2011 and have not looked back. I understand if you can not, however. You will have to update the bootstrap file to use MySQL instead of PostgreSQL.</p>
+</blockquote>
+
+<h4 id="default-packages">Default Packages</h4>
+<p>The lines beginning with <code>apt-get install</code> essential software needed to compile Ruby, PostgreSQL, Redis, and PHP. These lines install the libraries through the package manager.</p>
+
+<h4 id="date-and-time-configuration">Date and Time Configuration</h4>
+<p>We want to ensure that the server is in the UTC timezone. Our production server will use UTC, so we want our development environment to mimic that. This will almost certainly be a different timezone than your host computer. Additionally, we set the default language and locale as English, UTF-8.</p>
+
+<h4 id="compilation">Compilation</h4>
+<p>We can finally start compiling all of the software necessary for the server. To begin, we create all of the directories in <code>/opt/src/</code> to store all of the source code for the software we are going to compile.</p>
+
+<p>The commands to compile each package will not be displayed in this chapter because they are repeated in Chapter 5 <em>Deployments</em>.</p>
+
+<blockquote>
+  <p>You will notice all software and files are downloaded from an Amazon S3 bucket named <code>brightmarch.build</code>. I store everything in that bucket because not all vendors provide an easily discoverable direct link to their tarballs (PHP) and some FTP servers are very, very slow (Ruby). The files uploaded are identical to the ones provided by the vendors. You are free to use my bucket and bandwidth.</p>
+</blockquote>
+
+<h5 id="ruby">Ruby</h5>
+<p>Compiling Ruby is simple. Although we are building a PHP application, we will make use of Ruby software. Installing Ruby 2.0.0 will also install the <code>gem</code> program which makes installing Ruby applications simple.</p>
+
+<p>We will be deploying our application from your Vagrant virtual machine. Capistrano is installed after Ruby is compiled and installed using the <code>gem</code> program. Capistrano will be covered in detail in Chapter 5 <em>Deployments</em>.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">gem install capistrano -v 2.15.5</code></pre></div>
+
+<h5 id="postgresql">PostgreSQL</h5>
+<p>Compiling PostgreSQL is surprisingly simple. We start by creating a user, <code>postgres</code>, that will run all of the PostgreSQL services. The home directory for the <code>postgres</code> user is also where we will store all of the database data (PostgreSQL calls this data the cluster).</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">useradd --home-dir /home/postgres --create-home --shell /bin/bash --user-group postgres</code></pre></div>
+
+<p>After PostgreSQL is compiled and installed, we run a command as the <code>postgres</code> user to initialize the database cluster in <code>/home/postgres/cluster/</code>. Additionally, we tell PostgreSQL the default encoding for the databases will be UTF-8.</p>
+
+<p>The last piece of administrative work necessary is to install the PostgreSQL initialization script. Ubuntu places these scripts, called services, in <code>/etc/init.d/</code>. The initialization script is downloaded and installed during the provisioning process. This ensures that Ubuntu starts PostgreSQL when Vagrant starts the server.</p>
+
+<p>Now that PostgreSQL is installed and running, we can create the default databases and users.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">su - postgres -c <span class="s2">&quot;createuser -d -e -hlocalhost -Upostgres $DBUSER&quot;</span>
+su - postgres -c <span class="s2">&quot;createdb -E &#39;UTF-8&#39; -O $DBUSER -hlocalhost -U$DBUSER $DBNAME&quot;</span></code></pre></div>
+
+<blockquote>
+  <p>PostgreSQL will also refer to users as roles, though they are not entirely synonymous.</p>
+</blockquote>
+
+<h5 id="redis">Redis</h5>
+<p>Redis is also incredibly simple to install. Like PostgreSQL, we want Redis to start when the server starts, so an initialization script is installed as well. Additionally, we have to tell Redis to run in the background as a daemon because it does not by default.</p>
+
+<h5 id="php">PHP</h5>
+<p>Finally, PHP is ready to be compiled and installed. To keep this instance of PHP as light as possible, only the most essential extensions are compiled.</p>
+
+<blockquote>
+  <p>You will have to update the configuration flags for PHP if you are compiling it against MySQL headers instead of PostgreSQL.</p>
+</blockquote>
+
+<p>By default, PHP looks in <code>/usr/local/lib/</code> for the <code>php.ini</code> file, so we copy the <code>php.ini-development</code> sample file there.</p>
+
+<p>We want to add the <code>redis</code> extension in addition to the extensions we compiled into PHP. This is extension is not bundled with PHP by default.</p>
+
+<p>To complete the installation of PHP, we add the <code>redis</code> extension to the <code>php.ini</code> file and tell PHP the default timezone is UTC.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">&quot;extension=redis.so&quot;</span> &gt;&gt; /usr/local/lib/php.ini
+<span class="nb">echo</span> <span class="s2">&quot;date.timezone=UTC&quot;</span> &gt;&gt; /usr/local/lib/php.ini</code></pre></div>
+
+<h5 id="wrapping-up">Wrapping Up</h5>
+<p>We are almost there! The last few steps are rather simple. By default, Vagrant creates a user named <code>vagrant</code> which is the user you use to SSH into the virtual machine. First, we ensure that the <code>.profile</code> file downloaded earlier is in the home directory on the virtual machine. Next, several pre-written files are downloaded. These are Bash and Vim files that I have built up over the years to make command line work more enjoyable. Of course, you are free to replace them with the files that make your development environment the most comfortable.</p>
+
+<p>Finally, we create the file that lets Vagrant know the virtual machine is fully provisioned.</p>
+
+<p>And with that, your Vagrant virtual machine is fully provisioned.</p>
+
+<h3 id="your-vagrant">Your Vagrant</h3>
+<p>Now that your Vagrant virtual machine is provisioned, you can access it using the command <code>vagrant ssh</code>. This command is identical to the <code>ssh</code> command you are already familiar with, with the exception that you can only access your virtual machine with it.</p>
+
+<p>You must execute this command from within the root of the Expert PHP Deployments Application so Vagrant knows which virtual machine to SSH into.</p>
+
+<p>If you will recall, we told Vagrant to sync a directory with your host machine. The <code>Vagrantfile</code> file specifies that the directory <code>/var/apps/expert-php-deployments</code> is to be synced to the root of the Expert PHP Deployments Application.</p>
+
+<p>Assuming you have not already SSHed into your Vagrant virtual machine, run the following commands to navigate to that directory and create a sample file there.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">vagrant ssh
+<span class="nb">cd</span> /var/apps/expert-php-deployments
+<span class="nb">echo</span> <span class="s2">&quot;In Your Vagrant&quot;</span> &gt; in-vagrant.txt</code></pre></div>
+
+<p>In another terminal session, navigate to the root of the Expert PHP Deployments Application directory on your host machine. You will see the file <code>in-vagrant.txt</code> listed with the contents “In Your Vagrant”.</p>
+
+<p>File syncing is obviously very powerful and will allow us to develop on our host machine while having the virtual machine execute all of our code.</p>
+
+<p>I have included a helper alias in the <code>.bash_aliases</code> file. You can run the command <code>goapps</code> and it will take you directly to the <code>/var/apps/</code> directory. From there, you can see the synced directory specified in the <code>Vagrantfile</code> file.</p>
+
+<p>Because your virtual machine is quite literally a Linux server, you can simply use the <code>exit</code> command to exit it and return to your host machine.</p>
+
+<h2 id="in-this-chapter-1">In This Chapter</h2>
+<p>In this chapter, you learned how to compile the essential architecture of your development server (a skill that will be used when provisioning your production server), and how to use Vagrant to manage your virtual machines.</p>
+
+<p>You are now ready to prep your application for deployment.</p>
+
+<h1 id="prepping-the-application">3. Prepping the Application</h1>
+
+<p>Spending the time to properly prep your application correctly is well worth your effort. This chapter is dedicated discussing the configuration files and helper scripts the Expert PHP Deployments Application uses.</p>
+
+<h2 id="objectives-2">Objectives</h2>
+<p>This chapter will teach you how to properly prep your application for easy collaborative development and deployment. Several helper scripts will be used and explained to make development easier.</p>
+
+<h2 id="motivating-factors-2">Motivating Factors</h2>
+<p>Keeping your application in a consistent format is also a big boost to team productivity. Knowing where all files are located before even cloning the repository helps tremendously. Conversely, having one application in a non-standard format amongst many applications in a standard format is nearly as bad as having no standards at all.</p>
+
+<p>As with most aspects of software engineering, my ideal application layout has evolved over time. Because I use Symfony for many of my projects, I follow a standard that works well for Symfony. With the advent of Composer, Packagist, and the PHP-PSR standards, coming up with a standard application layout is simpler than ever.</p>
+
+<h2 id="helper-scripts">Helper Scripts</h2>
+<p>I install the following helper scripts before I begin writing even one line of code. They are invaluable to me in the amount of time they save when working. Unless otherwise specified, all scripts reside in the root of the Expert PHP Deployments Application, and each should have the execute permission bit set on them.</p>
+
+<h3 id="run-server"><code>run-server</code></h3>
+<p>PHP 5.4 introduced a built in HTTP server for fast development. This server has completely changed the way I work. Gone are the days messing with Apache or Nginx on my local machine. Instead, I can fire up the PHP HTTP server and immediately start working.</p>
+
+<p>Every time you SSH into your Vagrant virtual machine, you will have to manually start the development PHP server. This script will start the server for you and put it in the background using the Unix program <code>nohup</code>.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+nohup php -S 0.0.0.0:8000 -t web &gt;/dev/null 2&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">&amp;</span></code></pre></div>
+
+<p>Because the PHP 5.4 HTTP server is very lightweight, it does not know how to route requests for files that do not exist on the hard drive. Thus, from time to time you will have write your own router. If you use popular open-source or commercial software, you can easily find a router script for your project.</p>
+
+<h3 id="run-tests"><code>run-tests</code></h3>
+<p>If your application has an extensive test suite, this script will make it easy to run it quickly.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+php phpunit.phar -d <span class="nv">memory_limit</span><span class="o">=</span>512M -c app/config/phpunit.xml <span class="nv">$*</span></code></pre></div>
+
+<p>This script runs all of the tests in your project. The <code>-c</code> flag points to the PHPUnit XML configuration file.</p>
+
+<blockquote>
+  <p>To make testing as simple as possible, we will use the PHP Archive (.phar) installation of PHPUnit. This will be covered in depth in Chapter 4 <em>Working With Phing</em>.</p>
+</blockquote>
+
+<h3 id="run-db-migrations"><code>run-db-migrations</code></h3>
+<p>This simple script will execute any non-migrated database changes.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+php doctrine-migrations.phar migrations:migrate <span class="se">\</span>
+    --db-configuration<span class="o">=</span>app/config/config-postgres.php <span class="se">\</span>
+    --configuration<span class="o">=</span>app/config/migrations.yml</code></pre></div>
+
+<blockquote>
+  <p>The file <code>app/config/config-postgres.php</code> will be created by Phing during the build process. This will be covered in depth in Chapter 4 <em>Working With Phing</em>.</p>
+</blockquote>
+
+<h3 id="create-db-migration"><code>create-db-migration</code></h3>
+<p>This simple script will create a new empty database migration. It will output the name and location of the new migration class.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/bash</span>
+
+php doctrine-migrations.phar migrations:generate <span class="se">\</span>
+    --db-configuration<span class="o">=</span>app/config/config-postgres.php <span class="se">\</span>
+    --configuration<span class="o">=</span>app/config/migrations.yml</code></pre></div>
+
+<h3 id="build-dev"><code>build-dev</code></h3>
+<p>This script is large enough that Chapter 4 <em>Working With Phing</em> is dedicated to it. It will be described in depth in the following chapter.</p>
+
+<h3 id="configuration-files">Configuration Files</h3>
+<p>It is never a good idea to check in credential data into your source code. This includes, but is not limited to: database usernames and passwords, file paths, binary paths, third-party API keys, and configuration settings.</p>
+
+<p>A much better solution is to store an empty configuration file that is updated with development or production credentials when the application is built.</p>
+
+<p>The Expert PHP Deployments Application takes storing configuration files to the extreme by using three of them: App, Postgres, and Redis. For many smaller applications, a single configuration file will work fine.</p>
+
+<p>All configuration files are located in the <code>app/config/</code> directory and are named <code>config-app.php.template</code>, <code>config-postgres.php.template</code>, and <code>config-redis.php.template</code>.</p>
+
+<p>The executable PHP versions of these files will be created by Phing during the Expert PHP Deployments Application build process.</p>
+
+<p>You will notice that many of the values are surrounded by two @ signs in each of these files. The double @ signs tell Phing that the value between them should be replaced by some configuration value.</p>
+
+<p>Furthermore, each file returns a simple key/value array seemingly to nowhere. This is a handy method used in PHP to include a file directly into a variable.</p>
+
+<div class="highlight"><pre><code class="language-php" data-lang="php"><span class="x">$configApp = require __DIR__ . &#39;/app/config/config-app.php&#39;;</span></code></pre></div>
+
+<h4 id="wordpress-example">Wordpress Example</h4>
+<p>A sample <code>wp-config.php.template</code> file for Wordpress might resemble the following code.</p>
+
+<div class="highlight"><pre><code class="language-php" data-lang="php"><span class="x">/** The name of the database for WordPress */</span>
+<span class="x">define(&#39;DB_NAME&#39;, &#39;@@DB_NAME@@&#39;);</span>
+
+<span class="x">/** MySQL database username */</span>
+<span class="x">define(&#39;DB_USER&#39;, &#39;@@DB_USER@@&#39;);</span>
+
+<span class="x">/** MySQL database password */</span>
+<span class="x">define(&#39;DB_PASSWORD&#39;, &#39;@@DB_PASSWORD@@&#39;);</span>
+
+<span class="x">/** MySQL hostname */</span>
+<span class="x">define(&#39;DB_HOST&#39;, &#39;@@DB_HOST@@&#39;);</span></code></pre></div>
+
+<h3 id="build-settings-file">Build Settings File</h3>
+<p>The actual configuration values come from a file called the build settings file. The build settings file is located at <code>app/config/build.settings</code>.</p>
+
+<p>Like the configuration files, this file has an associated <code>.template</code> file that contains no private information.</p>
+
+<p>In Chapter 4 <em>Working With Phing</em> you will learn how this file is used to build the final configuration files.</p>
+
+<p>The build settings file is a simple key-value INI file.</p>
+
+<blockquote>
+  <p>The build settings file can be placed anywhere on the filesystem, which means for deployments we can have a copy of it stored in a place that will not be updated by Capistrano, allowing us to do deployments with ease.</p>
+</blockquote>
+
+<h2 id="in-this-chapter-2">In This Chapter</h2>
+<p>In this chapter, we discussed ways to prepare your application for easy development and deployments. We discussed proper configuration in modern PHP applications. Proper configuration is essential to ensure your production and development environments are as friendly as possible.</p>
+
+<p>Now that your application is properly configured, we are going use the open source tool Phing to build it for the development and production environments.</p>
+
+<h1 id="working-with-phing">4. Working With Phing</h1>
+
+<p>Phing is an open source PHP tool similar to Apache Ant. Using an XML file, Phing can build, deploy, and package your application. We want to automate as much of the Expert PHP Deployments Application development as possible, and using Phing is a great way to do just that. Phing is incredibly flexible, which makes it very powerful.</p>
+
+<h2 id="objectives-3">Objectives</h2>
+<p>This chapter will explain in detail how to use Phing to build your application for both the development and production environments.</p>
+
+<h2 id="motivating-factors-3">Motivating Factors</h2>
+<p>Using a tool to automate builds of your application is essential. Automation cuts down on errors and reduces the amount of time it takes to deploy your application properly. Building your application with Phing is essential to deploying it to production as well.</p>
+
+<h2 id="phing-philosophy">Phing Philosophy</h2>
+<p>Some developers use Phing for everything, including actual deployments. I do not. I have found that using Phing for its original purpose - building an application - suites it best. Trying to get Phing to deploy your application or package it to a single executable (or tarball) always seems to be a “hacky” process. However, it can build an application beautifully.</p>
+
+<p>Within the scope of this book, building an application means: cleaning up unnecessary files, creating configuration files, installing necessary vendors, warming a cache, and running database migrations. Because Phing is so flexible, you can define a build to do whatever you would like.</p>
+
+<p>Phing will be used in two places: your Vagrant virtual machine and production server.</p>
+
+<h2 id="targets">Targets</h2>
+<p>Phing uses an XML file, generally named <code>build.xml</code>, to build your application - or <em>project</em>. You define <em>targets</em> within your project. A target is a specific task you want Phing to perform. For example, creating the configuration files for your application is a specific target we will write.</p>
+
+<p>Like your code, you want your targets to be small and as specific as possible. By keeping your targets small and specific, you can easily test them and chain them together into a larger target. Similar to your code, by keeping your targets small and specific, you can reuse them in multiple areas of your build process.</p>
+
+<p>In Phing, the default target is named <code>build</code>. The <code>build</code> target should be available to build your entire application from scratch.</p>
+
+<h2 id="buildxml"><code>build.xml</code></h2>
+<p>We will begin by introducing the build file. The next eight sections of this chapter will go through the build file line by line to explain how everything works.</p>
+
+<p>The <code>build.xml</code> file is located in the root of the Expert PHP Deployments Application repository.</p>
+
+<blockquote>
+  <p>Several targets in the build file are too large to print. Please refer to the file for details on how those targets are written.</p>
+</blockquote>
+
+<h3 id="global-variables">Global Variables</h3>
+<p>The second line of the <code>build.xml</code> file creates your project, gives it a name, and defines the default target. Using the Phing command line tool, you can execute specific targets if you wish. Executing specific targets is particularly helpful for testing your build process incrementally. If no target name is passed, Phing will use the default one defined here.</p>
+
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;project</span> <span class="na">name=</span><span class="s">&quot;Expert PHP Deployments&quot;</span> <span class="na">default=</span><span class="s">&quot;build&quot;</span><span class="nt">&gt;</span></code></pre></div>
+
+<p>The call to the <code>&lt;resolvepath&gt;</code> command constructs an absolute path and saves it in a variable named <code>${root_path}</code>.</p>
+
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;resolvepath</span> <span class="na">propertyName=</span><span class="s">&quot;root_path&quot;</span> <span class="na">file=</span><span class="s">&quot;./&quot;</span> <span class="nt">/&gt;</span></code></pre></div>
+
+<blockquote>
+  <p>In Phing, variables are referenced with a dollar sign, open brace, variable name, and a close brace.</p>
+</blockquote>
+
+<p>The calls to the <code>&lt;php&gt;</code> command call PHP itself to generate some values that will be used in the configuration files.</p>
+
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;php</span> <span class="na">function=</span><span class="s">&quot;date&quot;</span> <span class="na">returnProperty=</span><span class="s">&quot;build_date&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;param</span> <span class="na">value=</span><span class="s">&quot;c&quot;</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/php&gt;</span>
+<span class="nt">&lt;php</span> <span class="na">function=</span><span class="s">&quot;time&quot;</span> <span class="na">returnProperty=</span><span class="s">&quot;build_timestamp&quot;</span> <span class="nt">/&gt;</span></code></pre></div>
+
+<p>The <code>returnProperty</code> attribute of the <code>&lt;php&gt;</code> command defines the name of the variables that will hold the output of PHP’s <code>date()</code> and <code>time()</code> functions, respectively. The first call to the <code>&lt;php&gt;</code> command is equivalent to the following code in PHP.</p>
+
+<div class="highlight"><pre><code class="language-php" data-lang="php"><span class="x">$build_date = date(&#39;c&#39;);</span></code></pre></div>
+
+<p>Likewise, the second call to the <code>&lt;php&gt;</code> command is the equivalent to this code in PHP:</p>
+
+<div class="highlight"><pre><code class="language-php" data-lang="php"><span class="x">$build_timestamp = time();</span></code></pre></div>
+
+<p>The <code>${build_date}</code> and <code>${build_timestamp}</code> Phing variables can be added to a configuration file if you wish. They can be used for many purposes, such as cache invalidation or echoing the build date in an HTML comment in your application.</p>
+
+<p>After determining the dates above, the lines beginning with the <code>&lt;available&gt;</code> command perform a bit of logic to determine how configuration values are imported into Phing. If you recall in Chapter 3 <em>Prepping the Application</em>, we learned about the build settings file. The build settings file is a simple INI file that holds your development or production configuration values. Phing allows us to pass in a path to this file which will then be translated to a list of global variables that the build file will use to create the final configuration files.</p>
+
+<p>The <code>&lt;available&gt;</code> command first ensures the build settings file actually exists, and if so, imports it into Phing as a series of global variables with the <code>&lt;property&gt;</code> command.</p>
+
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;available</span> <span class="na">file=</span><span class="s">&quot;${build_settings_file}&quot;</span> <span class="na">property=</span><span class="s">&quot;build_settings_file_exists&quot;</span> <span class="na">value=</span><span class="s">&quot;1&quot;</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;if&gt;</span>
+    <span class="nt">&lt;equals</span> <span class="na">arg1=</span><span class="s">&quot;${build_settings_file_exists}&quot;</span> <span class="na">arg2=</span><span class="s">&quot;1&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;then&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">file=</span><span class="s">&quot;${build_settings_file}&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/then&gt;</span>
+<span class="nt">&lt;/if&gt;</span></code></pre></div>
+
+<h3 id="target-build">Target: <code>build</code></h3>
+<p>As mentioned previously, <code>build</code> is the default target that Phing executes. You will notice, however, that this target does not actually do anything directly. Instead, it “depends” by way of the <code>depends</code> attribute on several other targets. In Phing, when a target depends on one or more targets, it executes the dependencies first.</p>
+
+<p>My preference is to use the <code>build</code> target to build my application for the development environment. Each of the depended on targets will be described later in this chapter.</p>
+
+<h3 id="target-deploy">Target: <code>deploy</code></h3>
+<p>Similar to the <code>build</code> target, the <code>deploy</code> target builds the Expert PHP Deployments Application for an actual deployment (or production) environment. It handles a few additional depended on targets which will be described further.</p>
+
+<h3 id="target-clean">Target: <code>clean</code></h3>
+<p>As the name implies, the clean target cleans the Expert PHP Deployments Application of temporary or non-versioned files. Specifically, the configuration files are deleted as they will be rebuilt by Phing.</p>
+
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;target</span> <span class="na">name=</span><span class="s">&quot;clean&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;delete</span> <span class="na">dir=</span><span class="s">&quot;${root_path}/vendor/&quot;</span> <span class="na">quiet=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;delete</span> <span class="na">file=</span><span class="s">&quot;${root_path}/app/config/config-app.php&quot;</span> <span class="na">quiet=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;delete</span> <span class="na">file=</span><span class="s">&quot;${root_path}/app/config/config-postgres.php&quot;</span> <span class="na">quiet=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;delete</span> <span class="na">file=</span><span class="s">&quot;${root_path}/app/config/config-redis.php&quot;</span> <span class="na">quiet=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
+<span class="nt">&lt;/target&gt;</span></code></pre></div>
+
+<h3 id="target-compile-vendors">Target: <code>compile-vendors</code></h3>
+<p>Compiling vendors tells Composer to install all of the vendors based on the <code>composer.lock</code> file. The <code>checkreturn</code> attribute tells Phing to check the return value of the command executed. If it returns a non-zero value, Phing will exit with an error. This is helpful for production builds. If project fails to compile all of the vendors during a production deployment, the deployment will fail and no changes will be made.</p>
+
+<p>The <code>passthru</code> attribute displays all of the output from the executed command to you. This is helpful for debugging purposes.</p>
+
+<h3 id="target-compile-composer-cache">Target: <code>compile-composer-cache</code></h3>
+<p>This target is only called for builds being deployed to production. It can drastically improve performance by telling Composer to build a mapping of class names to their physical locations on the disk rather than relying on the autoloader.</p>
+
+<h3 id="target-compile-configuration">Target: <code>compile-configuration</code></h3>
+<p>The <code>compile-configuration</code> target is the most important target in the build process. The goal of the this target is to take the build settings file and translate it into the final configuration files that the Expert PHP Deployments Application application uses.</p>
+
+<p>The target is comprised of three <code>&lt;copy&gt;</code> commands. The attributes <code>file</code> and <code>tofile</code> of the <code>&lt;copy&gt;</code> command are simple: they tell Phing to take a file and copy it to a new file. The <code>overwrite</code> attribute is set to true so Phing will not complain if the file already exists; the configuration file generated by Phing will always be the most current and accurate.</p>
+
+<p>Before copying a configuration file, Phing runs a filter on the <code>file</code> attribute. The filter is defined with the <code>&lt;filterchain&gt;</code> and <code>&lt;replacetokens&gt;</code> commands. You will see many values surrounded by two @ symbols in each of the configuration file templates. The <code>begintoken</code> and <code>endtoken</code> attributes of the <code>&lt;replacetokens&gt;</code> command tell Phing to replace any string between those values (and the tokens themselves) with a value.</p>
+
+<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="nt">&lt;filterchain&gt;</span>
+    <span class="nt">&lt;replacetokens</span> <span class="na">begintoken=</span><span class="s">&quot;@@&quot;</span> <span class="na">endtoken=</span><span class="s">&quot;@@&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;token</span> <span class="na">key=</span><span class="s">&quot;BUILD_DATE&quot;</span> <span class="na">value=</span><span class="s">&quot;${build_date}&quot;</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;token</span> <span class="na">key=</span><span class="s">&quot;BUILD_TIMESTAMP&quot;</span> <span class="na">value=</span><span class="s">&quot;${build_timestamp}&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/replacetokens&gt;</span>
+<span class="nt">&lt;/filterchain&gt;</span></code></pre></div>
+
+<p>The <code>compile-configuration</code> target is a prime example of why you want to keep your targets small and specific. If your build settings file changes, you can rebuild your configuration file by telling Phing to only execute the <code>compile-configuration</code> target rather than having to rebuild your application from scratch.</p>
+
+<p>Run the following command to execute only the <code>compile-configuration</code> target.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">php phing.phar <span class="se">\</span>
+    -Dbuild_settings_file<span class="o">=</span>app/config/build.settings <span class="se">\</span>
+    compile-configuration</code></pre></div>
+
+<blockquote>
+  <p>The build settings file must already exist for this command to work. Running the command above is optional.</p>
+</blockquote>
+
+<h3 id="target-run-database-migrations">Target: <code>run-database-migrations</code></h3>
+<p>This migration runs any non-migrated database changes.</p>
+
+<h2 id="build-dev-1"><code>build-dev</code></h2>
+<p>In Chapter 3 <em>Prepping the Application</em>, the script <code>build-dev</code> was introduced but not fully explained.</p>
+
+<p><code>build-dev</code> is a script that makes it very easy for you to build your application for a development environment. The script is specifically made for teams of developers to allow each of them to get a working development environment as quickly and simply as possible.</p>
+
+<p>The primary purpose of the <code>build-dev</code> script is to ensure the environment is set up properly and to download essential software for development.</p>
+
+<p>The script is meant to be invoked manually, and is verbose in what it is doing. If any step fails, it will output an error and force you to correct it before continuing.</p>
+
+<blockquote>
+  <p>Using Vagrant for developing has removed a lot of these checks by normalizing the environment.</p>
+</blockquote>
+
+<p>It starts by ensuring the build settings file exists. This file, of course, is created by copying the templated build settings file to the non-templated version and updating the necessary values. This step is the only manual step in building your application for development.</p>
+
+<p>Next, Composer, Doctrine Migrations, PHPUnit, and Phing are installed. My preferred method for installing Phing and PHPUnit are to use the PHAR binaries. This makes it extremely easy to run them and keeps your vendors as small as possible which keeps deployments faster.</p>
+
+<p>Finally, <code>build-dev</code> uses Phing to actually build the project with the following command:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">php phing.phar -Dbuild_settings_file<span class="o">=</span>config/build.settings build</code></pre></div>
+
+<blockquote>
+  <p>I originally wrote <code>build-dev</code> to simply run that one command above because it can be quite verbose. From there, like many programming tasks that started small, the <code>build-dev</code> script grew to incorporate more features.</p>
+</blockquote>
+
+<h2 id="previewing-your-application">Previewing Your Application</h2>
+<p>Finally! We are at a point where you have a fully configured and buildable application. Lets build it and ensure everything works.</p>
+
+<p>First, run the <code>build-dev</code> script <em>in your Vagrant box</em> to build the Expert PHP Deployments Application. It is essential that you run this on your Vagrant box so the database migrations are made against the Postgres server installed in your Vagrant virtual machine.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">vagrant ssh
+<span class="nb">cd</span> /var/apps/expert-php-deployments
+./build-dev</code></pre></div>
+
+<p>After your application is built, run the <code>run-server</code> script in your Vagrant virtual machine as well. This will start the built-in PHP development server.</p>
+
+<p>On your host machine, navigate to <code>http://localhost:8000</code> and watch the Expert PHP Deployments Application come to life!</p>
+
+<h2 id="in-this-chapter-3">In This Chapter</h2>
+<p>In this chapter, you learned how to use Phing to build the Expert PHP Deployments Application. Because Phing is a general purpose tool, you can use it to build anything you want - including non-PHP projects!</p>
+
+<p>Now that you know how Phing is integrated with our development process, we will configure a production server and deploy your application with Capistrano.</p>
+
+<h1 id="deployments">5. Deployments</h1>
+
+<p>If you began programming for the web at the beginning of the century, you probably deployed your application like many of us did: manually copy files to a remote server via FTP.</p>
+
+<p>This method worked well because many of us did not use source control, our applications were small, and a few minutes of downtime were allowable.</p>
+
+<p>However, this model of releasing your software obviously has its flaws. It is a manual process which means a human has to interact with it in some way. Throwing the human element into an action that computers were specifically made for means you are going to introduce errors.</p>
+
+<h2 id="objectives-4">Objectives</h2>
+<p>As the web grew, developers wrote better tools to handle tedious and repetitive tasks during application deployment.</p>
+
+<p>One such tool is named Capistrano, and it, along with deployment best practices are the subject of this chapter.</p>
+
+<h2 id="motivating-factors-4">Motivating Factors</h2>
+<p>Having humans perform the task a computer can do easily takes a lot more time. Computers are fantastic at automation, so automating your deployment process makes sense. Opening your FTP client, connecting to the server, navigating to your local and remote destinations, and dragging the files to their final resting place is a tedious and time-consuming operation fraught with error. Ever accidentally copy your development configuration file into production?</p>
+
+<h2 id="deployment-philosophy">Deployment Philosophy</h2>
+<p>Often, deploying software is left as the very last stage of a project, and it always introduces headaches when done so. For many developers, deploying software seems to be guided by fear rather than comfort. They fear they are going to break the production system rather than feeling comfortable the release is solid.</p>
+
+<p>Any developer who has worked in the industry for more than a few years has felt this: spending several all nighters at the end of a year long project toiling away trying to get this behemoth deployed.</p>
+
+<p>My philosophy for deploying software is simple: deploy small changes as often as possible. When you wait several months, weeks, or even days to deploy your application, the delta between what is in production and what is ready to be deployed grows. As that delta grows, several issues can creep into your deployment.</p>
+
+<ul>
+  <li>Developers or project managers will lose sight of what went into this release, meaning unexpected code or non-production ready features could be released.</li>
+  <li>If a mission critical bug is discovered and you must rollback, the rollback process to the previous release is much more tedious.</li>
+  <li>The number of people who touched the release grows, which can add confusion to the deployment process.</li>
+</ul>
+
+<p>If you keep deployments small and frequent, several things start to happen.</p>
+
+<ul>
+  <li>The fear of releases diminishes. When you have a fear of something, confronting that fear time after time is one way to resolve it. You become comfortable in releasing your software.</li>
+  <li>The amount of code being deployed is minimal. This makes it easy to know what is being deployed.</li>
+  <li>The number of people involved with the release is smaller.</li>
+  <li>It becomes much easier to track what actually was deployed.</li>
+</ul>
+
+<p>Please do not confuse comfortability in deployments with complacency. I am not advocating that you become apathetic to your deployment process; rather I advocate the exact opposite. You should spend a large amount of time automating your release process as it is a vital part of your software.</p>
+
+<h2 id="building-your-production-server">Building Your Production Server</h2>
+<p>Naturally, before you deploy to a production server, you must build and configure the server first. This section will show you to build a production-ready Ubuntu 12.04 64bit server from scratch. If you use a host service like Heroku or AppFog, you are free to skip these initial sections.</p>
+
+<p>A lot of the tasks in this chapter can be automated using tools like Chef or Puppet. Using those tools are out of the scope of this book. However, it is also important you know how to configure and secure a Linux server to use those tools effectively.</p>
+
+<h3 id="selecting-a-vps">Selecting a VPS</h3>
+<p>For smaller applications, using a virtual private server hosting company will work fine.</p>
+
+<p>I have had extremely good luck with the host Linode. All of our production applications at Bright March are hosted with Linode, and I highly recommend them.</p>
+
+<p>Digital Ocean is another host that I have experience with. They are much newer to the hosting scene, and are having some growing pains, but at $5/month for their most basic plan, they are hard to beat. However, I have found their networks are less reliable than Linode’s.</p>
+
+<blockquote>
+  <p>If you decide to go with Digital Ocean, you will need to allocate swap space on your server. Their <a href="https://www.digitalocean.com/community/articles/how-to-add-swap-on-ubuntu-12-04">library will tell you</a> how to do this. If you do not, compiling large packages like PHP may fail.</p>
+</blockquote>
+
+<p>I also have experience with the Rackspace Cloud and unfortunately I was disappointed with it. The servers (at least the lower end ones) were extremely slow, single core, and the network was very, very slow. Pings between servers were in the 50ms range, whereas they should be in the sub-2ms range at the very worst. By comparison, pings between my Linode servers are in the .4 - .5ms range.</p>
+
+<p>I do not have any experience using Amazon EC2 for application hosting.</p>
+
+<p>Once you have made your choice, create a new 64bit Ubuntu 12.04 server from the image provided by the host. You will only need the least powerful server they have.</p>
+
+<h3 id="installing-necessary-libraries">Installing Necessary Libraries</h3>
+<p>The next several steps will resemble the tasks executed by the Vagrant bootstrap file closely. They are not identical, which is why they are being covered individually. However, you may find that you can set up your own shell script to bootstrap a production-ready server from scratch.</p>
+
+<p>Additionally, this chapter will assume you are SSHed into your server as the <code>root</code> user. All of the configuration files below can be found in the directory <code>app/server/</code> in the Expert PHP Deployments Application repository.</p>
+
+<p>Once you are SSHed into your server, you need to install some necessary libraries. If you recall, my general philosophy is to install the libraries from the package manager, and install your critical packages from source. That is exactly what this section will describe.</p>
+
+<p>Run the following commands to install the necessary libraries to compile Ruby, Nginx, PHP, and Postgres.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">apt-get update
+
+apt-get install -y bash-completion build-essential <span class="se">\</span>
+     vim libssl-dev openssl git bison <span class="se">\</span>
+     flex curl libxml2-utils htop
+
+apt-get install -y libkrb5-dev libxml2 libxml2-dev <span class="se">\</span>
+     libxslt1-dev libossp-uuid-dev uuid python-dev <span class="se">\</span>
+     libreadline6 libreadline-dev
+
+apt-get install -y autoconf libcurl4-openssl-dev <span class="se">\</span>
+     libmcrypt4 libmcrypt-dev libicu48 libicu-dev <span class="se">\</span>
+     libpcre3-dev</code></pre></div>
+
+<p>We begin by updating the <code>sources.list</code> file Aptitude uses to ensure we get the latest sources (often, the image provided by the host is out of date).</p>
+
+<p>Then, essential packages are installed. The <code>build-essential</code> package installs <code>gcc</code>, <code>g++</code>, <code>make</code>, and several other utilities for compiling software on your Linux server.</p>
+
+<p>After those packages are installed, the libraries needed for compiling Nginx, Redis, Ruby, Postgres, and PHP are installed.</p>
+
+<h3 id="times-and-encodings">Times and Encodings</h3>
+<p>You will want to ensure your server uses the UTC timezone and uses UTF-8 character encoding.</p>
+
+<p>By using UTC, you normalize all times on the server. It makes doing date calculations much simpler. UTF-8 character encoding is essential for supporting non-ASCII characters.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo </span>UTC &gt; /etc/timezone
+dpkg-reconfigure --frontend noninteractive tzdata
+locale-gen en_US.UTF-8
+update-locale <span class="nv">LANG</span><span class="o">=</span>en_US.UTF-8 <span class="nv">LC_ALL</span><span class="o">=</span>en_US.UTF-8</code></pre></div>
+
+<h3 id="users-and-groups">Users and Groups</h3>
+<p>Before we begin compiling all of the software you need for your server, you will need to add several users and groups.</p>
+
+<p>When setting up new users, the first action I take is to ensure everyone will have the same <code>.profile</code> file.</p>
+
+<p>I host a slightly modified <code>.profile</code> file that includes the directory that holds the Postgres binary locations for when we compile Postgres.</p>
+
+<p>Run the following command to install the customized <code>.profile</code> file.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">wget -qO /etc/skel/.profile https://s3.amazonaws.com/brightmarch.build/.profile</code></pre></div>
+
+<p>When a new user is created, the <code>/etc/skel/.profile</code> file will be copied to the home directory of that user.</p>
+
+<blockquote>
+  <p>As you will see, any file created in <code>/etc/skel/</code> will be copied to the home directory of each new user created. It is a very handy way to normalize all user settings.</p>
+</blockquote>
+
+<p>Furthermore, the default Bash settings are fairly boring and uninformative. Over the years, I have built up a series of Bash helpers to make administration easier.</p>
+
+<p>The files, <code>.bash_aliases</code>, <code>.bash_envvars</code>, and <code>.vimrc</code>, are also hosted like the <code>.profile</code> file and can be installed in the <code>/etc/skel/</code> directory as well.</p>
+
+<p>Run the following commands to install the Bash helper scripts.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">wget -qO /etc/skel/.bash_aliases https://s3.amazonaws.com/brightmarch.build/.bash_aliases
+
+wget -qO /etc/skel/.bash_envvars https://s3.amazonaws.com/brightmarch.build/.bash_envvars
+
+wget -qO /etc/skel/.vimrc https://s3.amazonaws.com/brightmarch.build/.vimrc</code></pre></div>
+
+<p>The <code>.bash_aliases</code> file contains a list of helpful aliases to shorten your administrative duties.</p>
+
+<p>Within the <code>.bash_aliases</code> file, you will find an alias named “<code>..</code>” - literally two periods. Instead of typing <code>cd ..</code> many times to go up a directory, you can simply type <code>..</code>. If you wish to go back four directories, you can type <code>.. 4</code>.</p>
+
+<p>The <code>.bash_envvars</code> file sets two environment variables: <code>$PS1</code> and <code>$PATH</code>. The <code>$PS1</code> environment variable is the one that determines what your Bash prompt looks like. It updates the Bash prompt to resemble the one below.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="o">[</span>linode:/srv/http/apps<span class="o">]</span> <span class="o">(</span>user@expertphpdeployments.com 10:56:23<span class="o">)</span></code></pre></div>
+
+<p>In the example above, the name of the hosting company is listed first. Next, the current directory is given. Finally, the current user, fully qualified hostname, and current server time are displayed. The section of the <code>$PS1</code> that displays the username, host, and time is colored red. This is a helpful indicator to me that I am on a production server, and to be extra careful of my actions.</p>
+
+<p>We will start by creating the <code>deploy</code> user. Nginx will run as this user and Capistrano will use this user to deploy your application as well.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">useradd --home-dir /home/deploy --create-home --shell /bin/bash --user-group deploy</code></pre></div>
+
+<p>This user will have restricted non-sudo access. Additionally, it will not have a password as our server will not allow plaintext password authentication over SSH.</p>
+
+<p>You will need to copy your public key to the file <code>/home/deploy/.ssh/authorized_keys</code>. This will allow passwordless deploys and SSH connections. Additionally, this ensures only approved users can make deployments.</p>
+
+<blockquote>
+  <p>The <code>.ssh</code> directory may not exist. You may need to create it manually. The <code>authorized_keys</code> file should have its permissions set to 0600 as well.</p>
+</blockquote>
+
+<p>We will need to configure a user for Postgres after the <code>deploy</code> user is configured. Run the following command to create the <code>postgres</code> user. Postgres can not run as <code>root</code> and thus must have a dedicated user for running the database cluster.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">useradd --home-dir /home/postgres --create-home --shell /bin/bash --user-group postgres</code></pre></div>
+
+<h3 id="compiling-nginx-php-postgres-redis-and-ruby">Compiling Nginx, PHP, Postgres, Redis, and Ruby</h3>
+<p>When I first began releasing web software, I always used pre-compiled versions of the software provided by the host I used. That does not work long term, or for high-trafficked applications, so I taught myself how to compile and install them.</p>
+
+<p>Originally it seemed like a daunting task, however, it is quite simple once you start doing it frequently. I prefer to keep as many of the compilation options with their default values as possible, only changing them when it is necessary.</p>
+
+<p>For no reason I can adequately explain, I download and compile all of my packages in the <code>/opt/src</code> directory.</p>
+
+<p>Run the following command to create all of the directories you will use to compile your packages.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">mkdir -p /opt/src/<span class="o">{</span>nginx,php,php-redis,postgres,redis,ruby<span class="o">}</span></code></pre></div>
+
+<blockquote>
+  <p>The -p argument tells <code>mkdir</code> to make any parent directory that does not exist. <code>mkdir</code> also allows you to create a group of directories using the <code>{}</code> notation.</p>
+</blockquote>
+
+<h4 id="compiling-ruby">Compiling Ruby</h4>
+<p>Ruby is the simplest tool to compile. We will not make extensive use of it, but having a modern version of it installed is nice.</p>
+
+<p>Run the following commands to compile and install Ruby 2.0.0.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> /opt/src/ruby
+wget -q https://s3.amazonaws.com/brightmarch.build/ruby-2.0.0-p247.tar.gz
+tar -xzf ruby-2.0.0-p247.tar.gz
+<span class="nb">cd </span>ruby-2.0.0-p247
+./configure
+make
+make install</code></pre></div>
+
+<p>Run the following command to ensure Ruby was compiled and installed correctly.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">ruby --version</code></pre></div>
+
+<p>If all tasks went as expected, you will be greeted with the following output.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">ruby 2.0.0p247 <span class="o">(</span>2013-06-27 revision 41674<span class="o">)</span> <span class="o">[</span>x86_64-linux<span class="o">]</span></code></pre></div>
+
+<h4 id="compiling-postgres">Compiling Postgres</h4>
+<p>Compiling Postgres is one of those things that sounds much harder than it really is.</p>
+
+<p>Run the following commands to compile and install Postgres 9.2.4.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> /opt/src/postgres
+wget -q https://s3.amazonaws.com/brightmarch.build/postgresql-9.2.4.tar.bz2
+tar -xjf postgresql-9.2.4.tar.bz2
+<span class="nb">cd </span>postgresql-9.2.4
+./configure --disable-debug <span class="se">\</span>
+    --enable-thread-safety <span class="se">\</span>
+    --with-gssapi <span class="se">\</span>
+    --with-openssl <span class="se">\</span>
+    --with-libxml <span class="se">\</span>
+    --with-libxslt <span class="se">\</span>
+    --with-ossp-uuid <span class="se">\</span>
+    --with-python <span class="se">\</span>
+    --without-bonjour
+make world
+make install</code></pre></div>
+
+<blockquote>
+  <p>Running <code>make world</code> instead of just <code>make</code> for Postgres tells <code>make</code> to compile all of the configuration and helper files as well.</p>
+</blockquote>
+
+<p>Once Postgres is installed, you will need to initialize the cluster. The cluster is the area on the disk where all of your data will reside.</p>
+
+<p>To keep things simple, I use the <code>postgres</code> user’s home directory to store the cluster.</p>
+
+<p>Run the following command to initialize the cluster.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">su - postgres -c <span class="s2">&quot;initdb -D /home/postgres/cluster -E &#39;UTF-8&#39;&quot;</span></code></pre></div>
+
+<blockquote>
+  <p>The cluster has to be initialized as the <code>postgres</code> user, not the <code>root</code> user. Running <code>su - postgres</code> runs the commands as the <code>postgres</code> user.</p>
+</blockquote>
+
+<p>You need to add an init script once the Postgres binaries are installed and the cluster initialized.</p>
+
+<p>I host a custom built startup script that you can use to start, restart, and stop Postgres.</p>
+
+<p>Run the following commands to install the Postgres init script and to start the daemon.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">wget -qO /etc/init.d/postgres https://s3.amazonaws.com/brightmarch.build/postgres
+chmod +x /etc/init.d/postgres
+update-rc.d postgres defaults
+/etc/init.d/postgres start</code></pre></div>
+
+<blockquote>
+  <p>Debian and Ubuntu use <a href="https://wiki.debian.org/LSBInitScripts">Linux Standards Base init scripts</a> for starting and stopping daemons.</p>
+</blockquote>
+
+<p>The last task to finalizing Postgres installation is setting up a database user and creating the database.</p>
+
+<p>Run the following commands to create a database user and database.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">su - postgres -c <span class="s2">&quot;createuser -d -e -hlocalhost -Upostgres expert_php_deployments&quot;</span>
+su - postgres -c <span class="s2">&quot;createdb -E &#39;UTF-8&#39; -O expert_php_deployments -hlocalhost -Uexpert_php_deployments expert_php_deployments&quot;</span></code></pre></div>
+
+<p>Again, the actual commands, <code>createuser</code> and <code>createdb</code>, must be executed by the <code>postgres</code> user and <em>not</em> the <code>root</code> user. </p>
+
+<p>The <code>createuser</code> command creates a new user named <code>expert_php_deployments</code>. The <code>createdb</code> command creates a new database, also named <code>expert_php_deployments</code> that is owned, the <code>-O</code> flag, by the <code>expert_php_deployments</code> user.</p>
+
+<p>You will notice that no password was set for the user. Because this database only listens to <code>localhost</code> on an inaccessible port, I find it unnecessary to create a password for the user. Additionally, this password would often sit as plaintext in a configuration file, making it trivial for an intruder to find should they access your system.</p>
+
+<p>Run the following command to ensure Postgres was compiled, installed, and started properly.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">/usr/local/pgsql/bin/psql -hlocalhost -U expert_php_deployments expert_php_deployments</code></pre></div>
+
+<blockquote>
+  <p>The <code>psql</code> binary is in the <code>$PATH</code> of all other users created. The update to the <code>/etc/skel/.profile</code> file ensured this.</p>
+</blockquote>
+
+<p>If all tasks went as expected, you will be greeted with the following prompt in the <code>psql</code> client.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">psql <span class="o">(</span>9.2.4<span class="o">)</span>
+Type <span class="s2">&quot;help&quot;</span> <span class="k">for</span> help.
+
+<span class="nv">expert_php_deployments</span><span class="o">=</span>&gt;</code></pre></div>
+
+<p>Type <code>'\q'</code> to quit the <code>psql</code> tool.</p>
+
+<p>Postgres is now installed and configured!</p>
+
+<h4 id="compiling-redis">Compiling Redis</h4>
+<p>You can find just about any use for Redis. It is an extremely simple and popular piece of software.</p>
+
+<p>Redis is also incredibly simple to compile. It has no external dependencies - it even lacks a <code>configure</code> script!</p>
+
+<p>Run the following commands to compile and install Redis 2.6.10.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> /opt/src/redis
+wget -q https://s3.amazonaws.com/brightmarch.build/redis-2.6.10.tar.gz
+tar -xzf redis-2.6.10.tar.gz
+<span class="nb">cd </span>redis-2.6.10
+make
+make install</code></pre></div>
+
+<p>By default, Redis does not run as a daemon which means it will run in the foreground. We want Redis to run as a daemon, so the default configuration file must be updated to reflect this.</p>
+
+<p>Run the following commands to install the default Redis configuration file and make it run as a daemon.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">mkdir -p /etc/redis
+cp redis.conf /etc/redis/redis.conf
+sed -i <span class="s1">&#39;s/daemonize no/daemonize yes/g&#39;</span> /etc/redis/redis.conf</code></pre></div>
+
+<p>Like Postgres, Redis needs an init script to tell your server to start and stop Redis appropriately.</p>
+
+<p>Run the following commands to install the Redis init script and to start the daemon.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">wget -qO /etc/init.d/redis https://s3.amazonaws.com/brightmarch.build/redis
+chmod +x /etc/init.d/redis
+update-rc.d redis defaults
+/etc/init.d/redis start</code></pre></div>
+
+<p>Run the following command to ensure Redis was compiled, installed, and started properly.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">redis-cli</code></pre></div>
+
+<p>If all tasks went as expected, you will be greeted with the following prompt in the <code>redis-cli</code> client.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">redis 127.0.0.1:6379&gt;</code></pre></div>
+
+<p>Type ‘quit’ to quit the <code>redis-cli</code> tool.</p>
+
+<p>Redis is now installed and configured!</p>
+
+<h4 id="compiling-nginx">Compiling Nginx</h4>
+<p>Nginx is, of course, the HTTP server we will be using to handle requests to our application. We will be combining Nginx with PHP-FPM, Fast Process Manager, to execute requests to our application.</p>
+
+<p>My preference is to have all of the Nginx configuration live in <code>/srv/http/</code>, but you are free to decide where your application will live.</p>
+
+<p>Run the following commands to compile and install Nginx 1.5.4.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> /opt/src/nginx
+wget -q https://s3.amazonaws.com/brightmarch.build/nginx-1.5.4.tar.gz
+tar -xzf nginx-1.5.4.tar.gz
+<span class="nb">cd </span>nginx-1.5.4
+./configure --with-http_ssl_module <span class="se">\</span>
+    --with-pcre <span class="se">\</span>
+    --with-ipv6 <span class="se">\</span>
+    --without-http_memcached_module <span class="se">\</span>
+    --without-http_scgi_module <span class="se">\</span>
+    --without-http_uwsgi_module <span class="se">\</span>
+    --without-mail_smtp_module <span class="se">\</span>
+    --without-mail_pop3_module <span class="se">\</span>
+    --without-mail_imap_module <span class="se">\</span>
+    --user<span class="o">=</span>deploy <span class="se">\</span>
+    --group<span class="o">=</span>deploy <span class="se">\</span>
+    --conf-path<span class="o">=</span>/srv/http/conf/nginx.conf <span class="se">\</span>
+    --pid-path<span class="o">=</span>/srv/http/run/nginx.pid <span class="se">\</span>
+    --error-log-path<span class="o">=</span>/srv/http/log/error.log <span class="se">\</span>
+    --lock-path<span class="o">=</span>/srv/http/run/nginx.lock <span class="se">\</span>
+    --http-log-path<span class="o">=</span>/srv/http/log/access.log <span class="se">\</span>
+    --http-client-body-temp-path<span class="o">=</span>/srv/http/tmp/body <span class="se">\</span>
+    --http-fastcgi-temp-path<span class="o">=</span>/srv/http/tmp/fastcgi <span class="se">\</span>
+    --http-proxy-temp-path<span class="o">=</span>/srv/http/tmp/proxy <span class="se">\</span>
+    --prefix<span class="o">=</span>/srv/http <span class="se">\</span>
+    --sbin-path<span class="o">=</span>/usr/local/sbin/nginx
+make
+make install
+mkdir -p /srv/http/tmp/body
+mkdir -p /srv/http/tmp/fastcgi
+mkdir -p /srv/http/tmp/proxy
+mkdir -p /srv/http/apps
+chown -R deploy:deploy /srv/http/apps</code></pre></div>
+
+<blockquote>
+  <p>The install process will not create several necessary directories so you must manually. The directory <code>/srv/http/apps</code> is where your application will be deployed to.</p>
+</blockquote>
+
+<p>Like Postgres and Redis, Nginx needs an init script to tell your server to start and stop Nginx appropriately.</p>
+
+<p>Run the following commands to install the Nginx init script.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">wget -qO /etc/init.d/nginx https://s3.amazonaws.com/brightmarch.build/nginx
+chmod +x /etc/init.d/nginx
+update-rc.d nginx defaults</code></pre></div>
+
+<blockquote>
+  <p>We intentionally do not start Nginx yet. It has to be configured first. Configuring Nginx will be covered in a following section of this chapter.</p>
+</blockquote>
+
+<p>Nginx is now installed!</p>
+
+<h4 id="compiling-php">Compiling PHP</h4>
+<p>PHP is quite large, and thus more complex to configure. We will use only as many extensions as necessary.</p>
+
+<p>Run the following commands to compile and install PHP 5.5.12.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> /opt/src/php
+wget -q https://s3.amazonaws.com/brightmarch.build/php-5.5.12.tar.gz
+tar -xzf php-5.5.12.tar.gz
+<span class="nb">cd </span>php-5.5.12
+./configure --with-openssl <span class="se">\</span>
+    --with-zlib <span class="se">\</span>
+    --with-curl <span class="se">\</span>
+    --enable-zip <span class="se">\</span>
+    --with-xmlrpc <span class="se">\</span>
+    --enable-soap <span class="se">\</span>
+    --enable-sockets <span class="se">\</span>
+    --with-pgsql <span class="se">\</span>
+    --with-pdo-pgsql <span class="se">\</span>
+    --with-mcrypt <span class="se">\</span>
+    --enable-mbstring <span class="se">\</span>
+    --with-libxml-dir <span class="se">\</span>
+    --enable-intl <span class="se">\</span>
+    --enable-pcntl <span class="se">\</span>
+    --enable-opcache <span class="se">\</span>
+    --enable-fpm <span class="se">\</span>
+    --with-fpm-user<span class="o">=</span>deploy <span class="se">\</span>
+    --with-fpm-group<span class="o">=</span>deploy
+make
+make install</code></pre></div>
+
+<p>The last three configuration flags, <code>--enable-fpm</code>, <code>--with-fpm-user=deploy</code>, and <code>--with-fpm-group=deploy</code> are important. They tell PHP to compile and install the <code>php-fpm</code> binary and configuration file. Additionally, they tell PHP that the <code>php-fpm</code> binary will be run as the <code>deploy</code> user and group.</p>
+
+<blockquote>
+  <p>As with your Vagrant virtual machine, you must update the configuration flags to use MySQL headers if your application uses MySQL instead of Postgres.</p>
+</blockquote>
+
+<p>After PHP is compiled and installed, we need to install the <code>php.ini</code> file to its default location: <code>/usr/local/lib</code>.</p>
+
+<p>Run the following command to install the <code>php.ini</code> file.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">cp php.ini-production /usr/local/lib/php.ini</code></pre></div>
+
+<p>If you are like many PHP developers, you are used to running PHP under Apache with the <code>mod_php</code> module. This is fine for many use cases, but it can be quite slow for highly trafficked applications.</p>
+
+<p>The PHP-FPM project was started to help solve this. PHP-FPM runs as a daemon, similar to Postgres, Redis, and Nginx. When the PHP-FPM service starts, it binds itself to an IP address and port (or a Unix socket), and waits for requests from an application. It executes those requests and returns the data.</p>
+
+<p>This can be quite a departure for many developers used to <code>mod_php</code>. Rather than the PHP interpreter exiting after each request as with <code>mod_php</code>, it stays open waiting for more requests. Thus, memory leaks can cause issues faster.</p>
+
+<p>However, this method of execution is much faster: each request does not require the server to start another instance of the PHP interpreter to handle the request. Additionally, it separates your HTTP server from your application server.</p>
+
+<p>Because the PHP-FPM daemon is bound to an IP address and port, you can scale your server differently than if you used <code>mod_php</code> with Apache. With PHP-FPM, you could have several very powerful application servers running the PHP-FPM daemon and a less powerful front-end HTTP server running Nginx to proxy requests to and from the application servers.</p>
+
+<p>In a nutshell, PHP-FPM separates your web server from your application server giving you more options in how you scale your application.</p>
+
+<p>Because we only need a single server for the Expert PHP Deployments Application, Nginx and PHP-FPM will run on the same server.</p>
+
+<p>In addition to the <code>php.ini</code> file that PHP uses to set runtime parameters, PHP-FPM also has a configuration file that tells the daemons how to operate.</p>
+
+<p>That file is installed to <code>/usr/local/etc/php-fpm.conf.default</code> by default.</p>
+
+<p>Run the following commands to rename it so the initialization script can find it.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> /usr/local/etc/
+mv php-fpm.conf.default php-fpm.conf</code></pre></div>
+
+<blockquote>
+  <p>Like Nginx configuration, PHP-FPM configuration has its own dedicated section in this chapter.</p>
+</blockquote>
+
+<p>After the PHP-FPM file is installed properly, you will need to install the PHP-FPM init script.</p>
+
+<p>Run the following commands to install the PHP-FPM init script.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">wget -qO /etc/init.d/php-fpm https://s3.amazonaws.com/brightmarch.build/php-fpm
+chmod +x /etc/init.d/php-fpm
+update-rc.d php-fpm defaults</code></pre></div>
+
+<blockquote>
+  <p>You will have to restart the <code>php-fpm</code> daemon after each deployment. Because PHP-FPM is a long running daemon, the PHP 5.5 Opcache will cache data in memory between requests. Thus, the easiest way to clear the cache is to restart the PHP-FPM daemon.</p>
+</blockquote>
+
+<p>Run the following command to ensure PHP was compiled and installed.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">php -m</code></pre></div>
+
+<p>If all tasks went as expected, you will be greeted with the following output.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="o">[</span>PHP Modules<span class="o">]</span>
+Core
+ctype
+curl
+...</code></pre></div>
+
+<p>PHP is now installed!</p>
+
+<h4 id="compiling-the-php-redis-extension">Compiling the PHP Redis Extension</h4>
+<p>The final package to compile is the <code>redis</code> extension for PHP. While PHP has many excellent Redis libraries, the extension written in C is much faster and is recommended.</p>
+
+<p>Run the following commands to compile and install the latest version of the <code>redis</code> extension for PHP.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> /opt/src/php-redis
+git clone git://github.com/nicolasff/phpredis.git
+<span class="nb">cd </span>phpredis
+phpize
+./configure
+make
+make install</code></pre></div>
+
+<blockquote>
+  <p>The <code>phpize</code> command prepares a PHP extension for compilation.</p>
+</blockquote>
+
+<p>After the <code>redis</code> extension is compiled and installed, you will need to tell PHP about it by way of the <code>php.ini</code> file.</p>
+
+<p>Run the following command to add the <code>redis</code> extension to the <code>php.ini</code> file.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">echo</span> <span class="s2">&quot;extension=redis.so&quot;</span> &gt;&gt; /usr/local/lib/php.ini</code></pre></div>
+
+<p>Run the following command to ensure the <code>redis</code> extension for PHP was compiled and installed.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">php -m <span class="p">|</span> grep -i redis</code></pre></div>
+
+<p>If all tasks went as expected, you will be greeted with the following output.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">redis</code></pre></div>
+
+<p>The <code>redis</code> extension for PHP is now installed!</p>
+
+<h3 id="nginx-configuration">Nginx Configuration</h3>
+<p>Nginx is known for its rather simple configuration files. While it is not perfect, it is certainly far easier than Apache or Lighttpd.</p>
+
+<p>Nginx has many configuration parameters, most of which are out of the scope of this book. This book will show you the basics of how to get an Nginx server running while proxying requests to PHP-FPM.</p>
+
+<p>If you recall, Nginx had its prefix set to the directory <code>/srv/http/</code> which is where configuration, logs, cached files, and your application will live.</p>
+
+<p>To begin, navigate to <code>/srv/http/conf/</code>. When you installed Nginx, it placed the configuration files here along with duplicate files named <code>&lt;file-name&gt;.default</code>. These are helpful if you mess up and want to revert back to the original files.</p>
+
+<p>However, we do not need them, so you can delete them. There are only two files that are of interest to us: <code>nginx.conf</code> and a nonexistent virtual host configuration file (that you will create).</p>
+
+<p>Replace the <code>nginx.conf</code> file on your server with the contents of the <code>nginx.conf</code> file in the repository.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">worker_processes 1<span class="p">;</span>
+
+events <span class="o">{</span>
+    worker_connections 1024<span class="p">;</span>
+<span class="o">}</span>
+
+http <span class="o">{</span>
+    include mime.types<span class="p">;</span>
+
+    default_type application/octet-stream<span class="p">;</span>
+    sendfile on<span class="p">;</span>
+    keepalive_timeout 15<span class="p">;</span>
+    client_max_body_size 64m<span class="p">;</span>
+    types_hash_max_size 2048<span class="p">;</span>
+    server_names_hash_bucket_size 64<span class="p">;</span>
+
+    include vhost-expertphpdeployments.com.conf<span class="p">;</span>
+<span class="o">}</span></code></pre></div>
+
+<p>We start by telling Nginx to only spin up a single worker process when it starts. The <code>worker_processes</code> directive can be increased if your server takes on a high load.</p>
+
+<p>The init script for Nginx starts a master process when it is initialized. This process is owned by the <code>root</code> user. It reads the Nginx configuration files and decides how many worker processes to start.</p>
+
+<p>Each worker process is owned by the <code>deploy</code> user and is used to handle HTTP requests. For lighter load website, a single worker process is fine. If your website experiences a high amount of load, you can experiment with this number to lighten the load.</p>
+
+<p>The <code>worker_connections</code> directive is the key to having a high performance web server. It helps determine the total number of concurrent connections each worker can have.</p>
+
+<p>Thus, you multiply the <code>worker_processes</code> directive to the <code>worker_connections</code> directive to find the total number of connections this Nginx server can take advantage of.</p>
+
+<p>Our small server can handle 1024 simultaneous connections which is more than enough for our basic application. Nginx will only be responsible for proxying requests back to the application.</p>
+
+<p>The <code>http</code> block is where the main configuration for Nginx resides.</p>
+
+<p>We start by including the <code>mime.types</code> file. Like all HTTP servers, this file tells the server how to serve and accept many common MIME types. The default MIME types file bundled with Nginx is more than enough for your basic server.</p>
+
+<p>Next, we tell Nginx to use <code>application/octet-stream</code> as the default MIME type because it is generally considered a catch-all MIME type.</p>
+
+<blockquote>
+  <p>If you have a misconfigured server, this can cause PHP files to be sent as plaintext! Always ensure your application sits behind a front router and you explicitly whitelist allowed PHP scripts to execute. We will see how to do this shortly.</p>
+</blockquote>
+
+<p>The <code>sendfile</code> directive gives Nginx an extra performance boost by forcing it to use the Linux kernel to copy files quickly.</p>
+
+<p>If you are serving static assets with Nginx, you would want the <code>keepalive_timeout</code> directive to be several seconds. This directive tells Nginx how long to keep keep-alive requests open. This is useful for an application that sends static assets as all data can be sent in a single TCP request.</p>
+
+<p>This configuration value is set to 15 seconds because the Expert PHP Deployments Application serves several assets.</p>
+
+<blockquote>
+  <p>If your application uses a CDN, you can save on memory usage by setting the keep-alive timeout to 0 seconds. This ensure Nginx uses only a single TCP connection for your application request, and the CDN handles sending all of your assets.</p>
+</blockquote>
+
+<p>The <code>client_max_body_size</code> directive is fairly self-explanatory: it is the maximum size a HTTP request can be. If you are not expecting large file uploads, it is useful to set this to a low value (“1m” or “2m” is fine) to prevent someone from sending large amounts of data to your server.</p>
+
+<p>The <code>types_hash_max_size</code> directive increases the size of the hash table that stores the MIME types Nginx recognizes. By default the value 1024 which is too small. Bumping it to 2048 allows Nginx to store all of the MIME type information correctly.</p>
+
+<p>The <code>server_names_hash_bucket_size</code> directive increases the size of the server names for your virtual hosts. The default value is generally 32 characters, and it is quite possible to have server names that are longer than 32 characters. Increasing it to 64 characters is plenty for our application.</p>
+
+<blockquote>
+  <p>Of course, should you have a server name longer than 64 characters, you will have to increase this value as well. Nginx will not start otherwise.</p>
+</blockquote>
+
+<p>Finally, the <code>include</code> directive includes the virtual host configuration for our application.</p>
+
+<p>With the basic server configuration taken care of, it is time to move on to the heart of our server: the virtual host configuration.</p>
+
+<h4 id="nginx-virtual-host-configuration">Nginx Virtual Host Configuration</h4>
+<p>Copy the <code>vhost-expertphpdeployments.com.conf</code> file in the repository to to the directory <code>/srv/http/conf/</code>.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">upstream php <span class="o">{</span>
+    server 127.0.0.1:9000<span class="p">;</span>
+<span class="o">}</span>
+
+server <span class="o">{</span>
+    listen 80<span class="p">;</span>
+    server_name www.expertphpdeployments.com<span class="p">;</span>
+
+    <span class="k">return</span> <span class="m">301</span> http://expertphpdeployments.com<span class="nv">$request_uri</span><span class="p">;</span>
+<span class="o">}</span>
+
+server <span class="o">{</span>
+    listen 80<span class="p">;</span>
+    server_name expertphpdeployments.com<span class="p">;</span>
+
+    access_log /srv/http/apps/expertphpdeployments.com/shared/log/http-access.log<span class="p">;</span>
+    error_log /srv/http/apps/expertphpdeployments.com/shared/log/http-error.log crit<span class="p">;</span>
+
+    charset utf-8<span class="p">;</span>
+    index index.php index.html index.htm<span class="p">;</span>
+    root /srv/http/apps/expertphpdeployments.com/current/web<span class="p">;</span>
+
+    location ~ <span class="se">\.</span>php<span class="nv">$ </span><span class="o">{</span>
+        try_files <span class="nv">$uri</span> <span class="o">=</span>404<span class="p">;</span>
+
+        fastcgi_pass php<span class="p">;</span>
+        fastcgi_index index.php<span class="p">;</span>
+        fastcgi_param SCRIPT_FILENAME <span class="nv">$document_root$fastcgi_script_name</span><span class="p">;</span>
+        fastcgi_intercept_errors on<span class="p">;</span>
+
+        include fastcgi_params<span class="p">;</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></div>
+
+<p>We begin by setting up an upstream server for Nginx to proxy to using the <code>upstream</code> block. The upstream server in this case is PHP-FPM. By default, it binds to <code>127.0.0.1:9000</code>. You are free to change this in the PHP-FPM configuration file, or even have PHP-FPM bind itself to a Unix socket.</p>
+
+<p>Creating the upstream server is not required, but makes your configuration more concise. If you had several areas of your application that needed to proxy back to it, you can simply tell Nginx to use the upstream server named <code>php</code> instead of having to copy the configuration each time. </p>
+
+<p>After creating the upstream server, we add a small <code>server</code> block to redirect requests beginning with “www” to the “non-www” version of the website. This is entirely by preference only.</p>
+
+<p>The final <code>server</code> block is the most important and where the actual virtual host information is contained.</p>
+
+<p>After binding the server to a specific port and setting the server name, we tell Nginx where to log information. My preference is to keep all logs with each application: it makes it simpler to find them.</p>
+
+<p>The <code>crit</code> flag for error logs means only critical errors will be logged. This prevents errors like a missing favicon from being reported.</p>
+
+<blockquote>
+  <p>You can leave off the <code>crit</code> flag and have all errors logged. This might make sense for a newly released application to find errors you would have otherwise missed.</p>
+</blockquote>
+
+<p>After setting the logging configuration, we have to tell Nginx about this virtual host. The <code>charset</code> directive enforces a specific character set. The <code>index</code> directive sets the directory index order. Nginx will try to find an <code>index.php</code> first, <code>index.html</code> next, and finally <code>index.htm</code>. Finally, the <code>root</code> directive tells Nginx the root directory of your application.</p>
+
+<blockquote>
+  <p>The <code>current</code> directory of the path is not actually a directory, but a symlink created by Capistrano that will be covered later in this chapter.</p>
+</blockquote>
+
+<p>The <code>location</code> block is how Nginx passes information to your upstream PHP-FPM server. We begin by telling Nginx to send all files ending in <code>.php</code> to the upstream <code>php</code> server.</p>
+
+<p>The <code>try_files</code> directive is a bit tricky. It tells Nginx to attempt to find the files specified. In this instance, the file specified is the <code>$uri</code> environment variable. If that file can not be found, Nginx is to respond with a 404 error.</p>
+
+<p>The next four directives all begin with <code>fastcgi</code>. FastCGI is a module supported by Nginx. It is compiled by default into Nginx.</p>
+
+<p>FastCGI makes it very simple to proxy requests to a CGI server: PHP-FPM in our case.</p>
+
+<p>We start by using the <code>fastcgi_pass</code> directive which tells Nginx to pass requests for files ending in <code>.php</code> to the <code>php</code> upstream server we defined at the beginning of the configuration.</p>
+
+<p>Next, the <code>fastcgi_index</code> directive is very similar to the <code>index</code> directive in that it tells Nginx the directory index instructions.</p>
+
+<p>The <code>fastcgi_param</code> directive sets a server parameter for your script to use. This directive is how the <code>$_SERVER</code> superglobal in PHP is populated. In this case, we create the the <code>SCRIPT_FILENAME</code> parameter and it points to the file being requested. This line is absolutely essential, and your application will not run without it.</p>
+
+<p>The <code>fastcgi_intercept_errors</code> directive tells Nginx to pass 4xx and 5xx HTTP errors back to client directly, or handle them internally. In this case, we have Nginx handle them internally.</p>
+
+<p>Included with the Nginx configuration is a file named <code>fastcgi_params</code>. It is located in the same directory as the Nginx configuration. This configuration file adds more parameters similar to the <code>SCRIPT_FILENAME</code> parameter defined above.</p>
+
+<p>Nginx is incredibly simple to configure, and its [documentation][nginx-configuration] is great. The example outlined above is only a small sample of what Nginx can do, and I encourage you to experiment with different configuration values to get your server tuned properly.</p>
+
+<p>Nginx is now properly configured!</p>
+
+<h3 id="php-configuration">PHP Configuration</h3>
+<p>Configuring PHP is quite simple. This section will outline how to properly set up the Zend Opcache.</p>
+
+<p>To begin, open the file <code>/usr/local/lib/php.ini</code>. Navigate to the <code>[Date]</code> section and uncomment the <code>date.timezone</code> key. Set its value to <code>UTC</code>.</p>
+
+<p>Navigate to the <code>[opcache]</code> section. Add the following code directly underneath the <code>[opcache]</code> section.</p>
+
+<p><code>ini
+zend_extension=opcache.so
+</code></p>
+
+<p>Uncomment the following keys and set their values appropriately.</p>
+
+<ul>
+  <li><code>opcache.enable=1</code></li>
+  <li><code>opcache.enable_cli=1</code></li>
+  <li><code>opcache.memory_consumption=128</code></li>
+  <li><code>opcache.interned_strings_buffer=8</code></li>
+  <li><code>opcache.max_accelerated_files=4000</code></li>
+  <li><code>opcache.revalidate_freq=60</code></li>
+  <li><code>opcache.fast_shutdown=1</code></li>
+</ul>
+
+<p>Save and exit editing the <code>php.ini</code> file. </p>
+
+<p>Run the following command to ensure the Zend Opcache extension for PHP was installed.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">php -m
+php -v</code></pre></div>
+
+<p>If all tasks went as expected, you will be greeted with the following output.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="o">[</span>PHP Modules<span class="o">]</span>
+...
+
+<span class="o">[</span>Zend Modules<span class="o">]</span>
+Zend OPcache
+
+PHP 5.5.12 <span class="o">(</span>cli<span class="o">)</span> <span class="o">(</span>built: Sep <span class="m">18</span> <span class="m">2013</span> 17:27:36<span class="o">)</span>
+Copyright <span class="o">(</span>c<span class="o">)</span> 1997-2013 The PHP Group
+Zend Engine v2.5.0, Copyright <span class="o">(</span>c<span class="o">)</span> 1998-2013 Zend Technologies
+    with Zend OPcache v7.0.3-dev, Copyright <span class="o">(</span>c<span class="o">)</span> 1999-2013, by Zend Technologies</code></pre></div>
+
+<p>PHP is now properly configured!</p>
+
+<h3 id="php-fpm-configuration">PHP-FPM Configuration</h3>
+<p>While PHP itself is easy to configure, PHP-FPM takes a bit more patience and guidance.</p>
+
+<p>Because PHP-FPM is a long running process like Postgres, Nginx, or Redis, you must be careful to configure it properly so as not to chew through too much RAM or other system resources.</p>
+
+<p>If you recall, the PHP-FPM configuration lives in the file <code>/usr/local/etc/php-fpm.conf</code>. Begin by opening that file to edit.</p>
+
+<p>Set the <code>user</code> and <code>group</code> keys to the <code>deploy</code> user and group if they are not already set.</p>
+
+<p>The <code>listen</code> key should be set to <code>127.0.0.1:9000</code> because that is the IP address and port Nginx will proxy requests to. You will note in this section you can also proxy requests to a Unix socket if you desire.</p>
+
+<p>Next, the <code>pm</code> key should be set to <code>dynamic</code>. PM stands for process manager, and <code>dynamic</code> lets PHP-FPM decide how many workers to spin up or shut down.</p>
+
+<p>Because we are using the <code>dynamic</code> value for the <code>pm</code> key, the key <code>pm.max_children</code> must have a value. Set it to the number of CPUs your server has.</p>
+
+<p>The <code>pm.start_servers</code> key tells PHP-FPM how many processes to start when PHP-FPM is initialized. A good value is half the number of <code>pm.max_children</code>.</p>
+
+<p>The <code>pm.min_spare_servers</code> and <code>pm.max_spare_servers</code> keys can be set to <code>1</code> and <code>4</code> respectively.</p>
+
+<p>Finally, set the value of <code>pm.max_requests</code> to <code>200</code>. PHP, unfortunately, has a tendency to not garbage collect memory very well, and as a result long run processes can chew through memory quickly. By setting this key to a low value like 200, we ensure that each PHP-FPM process will be restarted after it handles 200 requests.</p>
+
+<p>Save and exit editing the <code>php-fpm.conf</code> file.</p>
+
+<p>PHP-FPM is now properly configured!</p>
+
+<h2 id="security">Security</h2>
+<p>Keeping your server secure is obviously very important. This section will cover basic ways to secure your server from the most common types of attacks.</p>
+
+<p>Naturally, your application is your largest attack vector. Only you as a programmer have control over that.</p>
+
+<p>Securing your server is also known as hardening it.</p>
+
+<h3 id="ssh">SSH</h3>
+<p>When you connect to your server through the command line, you generally use a tool named SSH, or secure shell. The server itself is running a daemon named <code>sshd</code> that listens for connection attempts and authenticates them if possible.</p>
+
+<p>Attackers constantly look for openings left by <code>sshd</code> to gain entry to your server. There are three simple things you can do to close these openings.</p>
+
+<ol>
+  <li>Do not allow logins from the <code>root</code> user.</li>
+  <li>Do not allow logins with passwords.</li>
+  <li>Require public key authentication only.</li>
+</ol>
+
+<p>To begin, open the file <code>/etc/ssh/sshd_config</code> on your server.</p>
+
+<p>Set the <code>PermitRootLogin</code>, <code>PermitEmptyPasswords</code>, and <code>PasswordAuthentication</code> settings to <code>no</code>. Set the <code>PubkeyAuthentication</code> setting to <code>yes</code> if it is not already.</p>
+
+<p>Finally, if not already part of the configuration file, add a new setting named <code>AllowAgentForwarding</code> and set its value to <code>yes</code>.</p>
+
+<p>Before you continue, you should note several things. First, you just disabled logins from the <code>root</code> user. This means that unless you have a user that can perform root actions via <code>sudo</code> that you will be completely locked out from doing <code>root</code> style tasks. It is <strong>VERY</strong> important that you create a user that can perform root level tasks with <code>sudo</code>.</p>
+
+<p>Next, you disabled password authentication. This means that you can no longer type your password and connect to the server. The <em>only</em> way to connect to this server is through using your public key.</p>
+
+<blockquote>
+  <p>Some security advisors recommend changing the default port that SSH runs on. I have never found this useful, but you are welcome to do so.</p>
+</blockquote>
+
+<p>To connect to the server, your public key must be copied to the file <code>/home/&lt;user&gt;/.ssh/authorized_keys</code> of the <code>&lt;user&gt;</code> you wish to connect as. It is <strong>VERY</strong> important that your key is copied to the <code>authorized_keys</code> file before you restart <code>sshd</code> and exit the server. If you do not, you will be permanently locked out of the server and will have to reconfigure it from scratch.</p>
+
+<p>My preference for creating users with elevated privileges is to add them to a special group named <code>admin</code>. You can then add a file in <code>/etc/sudoers.d/</code> named <code>admin</code> with the following contents.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">%admin <span class="nv">ALL</span><span class="o">=(</span>ALL<span class="o">)</span> NOPASSWD: ALL</code></pre></div>
+
+<p>Every user belonging to the <code>admin</code> group can now gain root access without entering a password.</p>
+
+<blockquote>
+  <p>Whenever I make changes to the <code>sshd</code> configuration, I will restart the <code>sshd</code> daemon and attempt to login to the server in a separate shell session. This ensures I can still access the server after I disconnect from it.</p>
+</blockquote>
+
+<p>Run the following command to restart the <code>sshd</code> daemon.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">/etc/init.d/sshd restart</code></pre></div>
+
+<p><code>sshd</code> is now properly configured.</p>
+
+<h3 id="iptables">iptables</h3>
+<p>iptables is an open source tool that acts as a firewall to your server.</p>
+
+<p>Generally, iptables comes pre-installed on your server, so you should not need to install it.</p>
+
+<p>Run the following command to see the current iptables configuration rules.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">iptables -L</code></pre></div>
+
+<p>The output, while somewhat cryptic, essentially shows you that all ports are open.</p>
+
+<p>To fix this, you will install a configuration file for iptables and then tell your server to use that configuration while the networking interface is being brought up.</p>
+
+<p>Run the following commands to create the <code>iptables.up.rules</code> file in the correct directory.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">wget -qO /etc/iptables.up.rules https://s3.amazonaws.com/brightmarch.build/iptables.up.rules</code></pre></div>
+
+<blockquote>
+  <p>The <code>iptables.up.rules</code> file <em>must</em> have a trailing newline in it or iptables will complain and fail to start.</p>
+</blockquote>
+
+<p>Like a lot of older Unix software, the iptables configuration rules are fairly difficult to learn. The most important lines are the ones that begin with <code>-A INPUT -p tcp</code> as these are what open specific ports. On this server, ports 80 (HTTP), 443 (HTTPS), and 22 (SSH) are opened. All other ports are blocked by default.</p>
+
+<p>Of course, your server is only as secure as your application is, but closing down all possible ports severely reduces the amount of attack vectors. Additionally, this means that Postgres and Redis can only accept connections from within the server itself.</p>
+
+<blockquote>
+  <p>Should you ever have to put your Postgres installation on a separate server, you will have to open port 5432 to allow connections to it.</p>
+</blockquote>
+
+<p>Next, navigate to the <code>/etc/network/if-pre-up.d/</code> directory and create a new file named <code>iptables</code> with the following contents in it.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c">#!/bin/sh</span>
+/sbin/iptables-restore &lt; /etc/iptables.up.rules</code></pre></div>
+
+<p>Run the following command to set the script as executable.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">chmod +x /etc/network/if-pre-up.d/iptables</code></pre></div>
+
+<p>Run the following command to add the iptables configuration rules to the iptables daemon.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">/etc/network/if-pre-up.d/iptables</code></pre></div>
+
+<p>Run the following command to ensure the iptables configuration rules were installed correctly.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">iptables -L</code></pre></div>
+
+<p>If all tasks went as expected, you will be greeted with the following output.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">...
+
+ACCEPT     tcp  --  anywhere           anywhere             tcp dpt:http
+ACCEPT     tcp  --  anywhere           anywhere             tcp dpt:https
+ACCEPT     tcp  --  anywhere           anywhere             state NEW tcp dpt:ssh
+
+...</code></pre></div>
+
+<p>iptables is now properly configured!</p>
+
+<h2 id="deploying-with-capistrano">Deploying With Capistrano</h2>
+<p>Capistrano is an open source tool written in Ruby made for deploying web software to a remote server. Capistrano will be used to ensure you have no-downtime deploys.</p>
+
+<p>The basic process for deploying with Capistrano follows.</p>
+
+<ol>
+  <li>Initiate a deployment with a command on your computer.</li>
+  <li>Capistrano uses your SSH public key to SSH into the remote server or servers.</li>
+  <li>For each server, Capistrano uses SSH agent forwarding to clone your application repository (from GitHub) to a specific directory.</li>
+  <li>Capistrano builds your application in the way you tell it to in a new directory.</li>
+  <li>Provided the build was successful, Capistrano updates a symlink to the latest build. This is where the <code>root</code> directive of your Nginx virtual host points to.</li>
+  <li>If instructed to, Capistrano will restart your HTTP or application server.</li>
+</ol>
+
+<p>Capistrano was installed when you bootstrapped your Vagrant virtual machine. Additionally, Capistrano can use the public key from your host machine because SSH agent forwarding is enabled. You will be deploying your application directly from your Vagrant virtual machine.</p>
+
+<p>Capistrano also makes use of SSH agent forwarding to use your public key for connecting to GitHub when cloning your repository during a deployment.</p>
+
+<p>Because Capistrano is written in Ruby, the Capistrano configuration files are also written in Ruby. Capistrano exposes a convenient API that makes it simple to tell it how you want to deploy your application.</p>
+
+<blockquote>
+  <p>Capistrano 3.0 was released recently and represents an entirely new direction for the software. Unfortunately, I do not consider it stable or documented well enough to use. Capistrano 2.x is very stable and battle-tested.</p>
+</blockquote>
+
+<p>Run the following command to ensure Capistrano was installed successfully. If you recall, Capistrano was installed when your Vagrant virtual machine was bootstrapped.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">cap --version</code></pre></div>
+
+<p>If all tasks went as expected, you will be greeted with the following output.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">Capistrano v2.15.5</code></pre></div>
+
+<p>Capistrano is now installed!</p>
+
+<h3 id="capistrano-configuration">Capistrano Configuration</h3>
+<p>Capistrano makes use of two main configuration files for the Expert PHP Deployments Application: <code>Capfile</code> and <code>config/deploy.rb</code>.</p>
+
+<p>The <code>Capfile</code> file is simple. It starts by loading the Capistrano API into memory. The deployment configuration is loaded in last.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="nb">load</span> <span class="s1">&#39;deploy&#39;</span>
+<span class="nb">load</span> <span class="s1">&#39;config/deploy&#39;</span></code></pre></div>
+
+<p>The Capistrano deployment configuration uses the Capistrano API for setting global deployment parameters, defining the order of operations, and configuring the tasks Capistrano will use to deploy the Expert PHP Deployments Application.</p>
+
+<p>The next five sections will discuss the Capistrano deployment configuration file.</p>
+
+<h4 id="deployment-options">Deployment Options</h4>
+<p>We begin by setting several deployment parameters. These set the name, repository URL, directory to deploy the application to on the production server, and the source control manager used.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">set</span> <span class="ss">:application</span><span class="p">,</span> <span class="s2">&quot;Expert PHP Deployments&quot;</span>
+<span class="n">set</span> <span class="ss">:repository</span><span class="p">,</span> <span class="s2">&quot;git@github.com:leftnode/expert-php-deployments.git&quot;</span>
+<span class="n">set</span> <span class="ss">:deploy_to</span><span class="p">,</span> <span class="s2">&quot;/srv/http/apps/expertphpdeployments.com&quot;</span>
+<span class="n">set</span> <span class="ss">:scm</span><span class="p">,</span> <span class="ss">:git</span></code></pre></div>
+
+<blockquote>
+  <p>Don’t worry if the directory specified by the <code>:deploy_to</code> parameter does not exist. Capistrano will create it for us.</p>
+</blockquote>
+
+<h4 id="server-roles">Server Roles</h4>
+<p>Next, we define the different server roles we have. Server roles are very useful in that you can use one deployment to deploy to multiple servers.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">role</span> <span class="ss">:web</span><span class="p">,</span> <span class="s2">&quot;expertphpdeployments.brightmarch.com&quot;</span>
+<span class="n">role</span> <span class="ss">:db</span><span class="p">,</span> <span class="s2">&quot;expertphpdeployments.brightmarch.com&quot;</span><span class="p">,</span> <span class="ss">:primary</span> <span class="o">=&gt;</span> <span class="kp">true</span></code></pre></div>
+
+<p>We define two roles in the Expert PHP Deployments Application: “web” and “db”.</p>
+
+<p>The “web” role is where the Expert PHP Deployments Application will be deployed to. The “db” role is where the database lives.</p>
+
+<p>You can add multiple servers to the “web” role. For example, if you had “web1.example.com” and “web2.example.com” as web servers your configuration might look like the following.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">role</span> <span class="ss">:web</span><span class="p">,</span> <span class="s2">&quot;web1.example.com&quot;</span><span class="p">,</span> <span class="s2">&quot;web2.example.com&quot;</span>
+<span class="n">role</span> <span class="ss">:db</span><span class="p">,</span> <span class="s2">&quot;web1.example.com&quot;</span><span class="p">,</span> <span class="ss">:primary</span> <span class="o">=&gt;</span> <span class="kp">true</span></code></pre></div>
+
+<p>The “db” role explicitly points to “web1.example.com” and sets the primary flag to true. This would ensure that migrations are <em>only</em> executed using the “web1.example.com” server and not both of them.</p>
+
+<blockquote>
+  <p>In the previous example, both “web1.example.com” and “web2.example.com” might use “db.example.com” as a database server. </p>
+</blockquote>
+
+<h4 id="github-options">GitHub Options</h4>
+<p>We set some basic SSH options because the Expert PHP Deployments Application is being hosted and deployed from GitHub.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">default_run_options</span><span class="o">[</span><span class="ss">:pty</span><span class="o">]</span> <span class="o">=</span> <span class="kp">true</span>
+<span class="n">ssh_options</span><span class="o">[</span><span class="ss">:forward_agent</span><span class="o">]</span> <span class="o">=</span> <span class="kp">true</span></code></pre></div>
+
+<p>The <code>default_run_options[:pty]</code> parameter tells Capistrano to passthru any input prompts to you.</p>
+
+<p>The <code>ssh_options[:forward_agent]</code> parameter tells Capistrano to use SSH agent forwarding to connect to GitHub. If you recall, this was enabled in the SSH configuration on the server.</p>
+
+<h4 id="environment-options">Environment Options</h4>
+<p>The environment options define how Capistrano should treat our environment.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">set</span> <span class="ss">:branch</span><span class="p">,</span> <span class="s2">&quot;master&quot;</span>
+<span class="n">set</span> <span class="ss">:use_sudo</span><span class="p">,</span> <span class="kp">false</span>
+<span class="n">set</span> <span class="ss">:user</span><span class="p">,</span> <span class="s2">&quot;deploy&quot;</span>
+<span class="n">set</span> <span class="ss">:keep_releases</span><span class="p">,</span> <span class="mi">5</span></code></pre></div>
+
+<p>We start by telling Capistrano to deploy the “master” branch. Next, we disable sudo usage because the <code>deploy</code> user lacks it on the production server.</p>
+
+<p>Finally, we tell Capistrano to only keep the latest five releases. This ensures our deployments do not take up too much space on the server.</p>
+
+<h4 id="tasks">Tasks</h4>
+<p>The heart of the Capistrano configuration are called “tasks”. Tasks are the processes you are instructing Capistrano to execute on the remote server.</p>
+
+<p>Capistrano comes with many pre-configured tasks. Run the following command to see a list of pre-configured tasks.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">cap -T</code></pre></div>
+
+<p>The tasks in the Capistrano configuration are comprised of two sections. The first describes the order the tasks should be executed. For example, before the application is built, you need to install Composer. Capistrano’s API is meant to be read like an English sentence: “before I build my application, I have to download the dependencies” or “after I successfully build the application, run the database migrations.”</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">before</span> <span class="s1">&#39;deploy:build&#39;</span><span class="p">,</span> <span class="s1">&#39;deploy:install_composer&#39;</span>
+<span class="n">before</span> <span class="s1">&#39;deploy:build&#39;</span><span class="p">,</span> <span class="s1">&#39;deploy:install_phing&#39;</span>
+<span class="n">before</span> <span class="s1">&#39;deploy:build&#39;</span><span class="p">,</span> <span class="s1">&#39;deploy:install_migrator&#39;</span>
+<span class="n">before</span> <span class="s1">&#39;deploy:create_symlink&#39;</span><span class="p">,</span> <span class="s1">&#39;deploy:build&#39;</span>
+<span class="n">after</span> <span class="s1">&#39;deploy:build&#39;</span><span class="p">,</span> <span class="s1">&#39;deploy:migrate&#39;</span>
+<span class="n">after</span> <span class="s1">&#39;deploy:restart&#39;</span><span class="p">,</span> <span class="s1">&#39;deploy:cleanup&#39;</span></code></pre></div>
+
+<p>The second section describes the tasks themselves.</p>
+
+<div class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="n">namespace</span> <span class="ss">:deploy</span> <span class="k">do</span>
+  <span class="n">phing_cmd</span> <span class="o">=</span> <span class="s2">&quot;...&quot;</span>
+
+  <span class="n">task</span> <span class="ss">:install_composer</span><span class="p">,</span> <span class="ss">:roles</span> <span class="o">=&gt;</span> <span class="ss">:web</span> <span class="k">do</span>
+    <span class="n">run</span> <span class="s2">&quot;...&quot;</span>
+  <span class="k">end</span>
+
+  <span class="n">task</span> <span class="ss">:install_phing</span><span class="p">,</span> <span class="ss">:roles</span> <span class="o">=&gt;</span> <span class="ss">:web</span> <span class="k">do</span>
+    <span class="n">run</span> <span class="s2">&quot;...&quot;</span>
+  <span class="k">end</span>
+
+  <span class="n">task</span> <span class="ss">:install_migrator</span><span class="p">,</span> <span class="ss">:roles</span> <span class="o">=&gt;</span> <span class="ss">:web</span> <span class="k">do</span>
+    <span class="n">run</span> <span class="s2">&quot;...&quot;</span>
+  <span class="k">end</span>
+
+  <span class="n">task</span> <span class="ss">:build</span><span class="p">,</span> <span class="ss">:roles</span> <span class="o">=&gt;</span> <span class="ss">:web</span> <span class="k">do</span>
+    <span class="n">run</span> <span class="nb">sprintf</span> <span class="n">phing_cmd</span><span class="p">,</span> <span class="s2">&quot;...&quot;</span>
+  <span class="k">end</span>
+
+  <span class="n">task</span> <span class="ss">:migrate</span><span class="p">,</span> <span class="ss">:roles</span> <span class="o">=&gt;</span> <span class="ss">:db</span> <span class="k">do</span>
+    <span class="n">run</span> <span class="nb">sprintf</span> <span class="n">phing_cmd</span><span class="p">,</span> <span class="s2">&quot;...&quot;</span>
+  <span class="k">end</span>
+<span class="k">end</span></code></pre></div>
+
+<p>All of the tasks take place in the <code>deploy</code> namespace. The first three tasks, <code>install_composer</code>, <code>install_phing</code>, and <code>install_migrator</code> install the necessary dependencies for building the Expert PHP Deployments Application.</p>
+
+<p>The <code>build</code> task builds the Expert PHP Deployments Application. This task runs Phing but executes the <code>deploy</code> target instead of the <code>build</code> target used for development.</p>
+
+<p>The final task, <code>migrate</code>, performs the database migrations to complete the deployment.</p>
+
+<blockquote>
+  <p>The last two tasks, <code>build</code> and <code>migrate</code> both make use of a Ruby variable named <code>phing_cmd</code> defined at the beginning of the <code>deploy</code> namespace. This is simply to reduce the amount and complexity of the code.</p>
+</blockquote>
+
+<h3 id="deploying-the-expert-php-deployments-application">Deploying the Expert PHP Deployments Application</h3>
+<p>The Expert PHP Deployments Application is now ready to be deployed. You will be deploying your application from your Vagrant virtual machine.</p>
+
+<p>Deploying applications with Capistrano is very simple and involves three distinct steps.</p>
+
+<ol>
+  <li>Setting up the Capistrano directory structure on the production server.</li>
+  <li>Creating the build settings file on the production server.</li>
+  <li>Deploying the Expert PHP Deployments Application to the deployment server.</li>
+</ol>
+
+<blockquote>
+  <p>The next few steps will not work correctly on your machine because you do not have access to the Expert PHP Deployments Application server. You will have to update the Capistrano configuration to point to your server instead of mine.</p>
+</blockquote>
+
+<p>Capistrano has a pre-configured task that will create the directory structure on the production server. You only have to run this task once.</p>
+
+<p>Run the following command to create the directory structure on the production server.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">cap deploy:setup</code></pre></div>
+
+<p>This command will create the following directory structure:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">/srv/http/apps/expertphpdeployments.com/
+    releases/
+    shared/
+        log/
+        pids/
+        system/</code></pre></div>
+
+<p>The <code>releases</code> directory are where each distinct release will be stored. Each release is a clone of the Expert PHP Deployments Application repository. Each release directory is a timestamp of when the release was made in the format <code>YYYYMMDDHHmmSS</code>.</p>
+
+<p>The <code>shared</code> directory holds data shared between each release. The <code>log</code> directory will hold the Nginx log files for this virtual host. The <code>pids</code> directory can be ignored.  The <code>system</code> directory is where we will store the pre-configured build settings file that each release will use to build itself.</p>
+
+<p>Next, you will need to add the build settings file to the production server. Begin by SSHing into your production server.</p>
+
+<p>Navigate to the <code>/srv/http/apps/expertphpdeployments.com/shared/system/</code> directory. Copy the contents of your build settings to this directory.</p>
+
+<blockquote>
+  <p>When your <code>build.settings</code> file changes as your application grows (and it will), don’t forget to update it on the production server <em>before</em> you deploy the latest version of your application. While you could certainly automate this process, I find the <code>build.settings</code> file changes so infrequently it is not necessary to do so. </p>
+</blockquote>
+
+<p>Exit your server. Your production server is now properly prepared for deployments!</p>
+
+<p>Run the following command to deploy the Expert PHP Deployments Application.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">cap deploy</code></pre></div>
+
+<p>This process will take a few minutes, especially on the first deployment. The longest part of the deployment is generally installing all of the vendors via Composer.</p>
+
+<p>Capistrano will show you all of the output of the deployment process along the way. It can be very verbose, so it will not be reproduced here.</p>
+
+<p>Capistrano creates a symlink named <code>current</code> to the most recent successful deployment. This allows your Nginx configuration to remain unchanged and for no-downtime deployments.</p>
+
+<p>While not covered in this book, Capistrano also covers rollbacks in the case of a buggy deployment. Rollbacks are generally bad, especially having to handle database rollbacks. In the three years I have been using Capistrano for deployments, I have never issued a single rollback. In every case, I was able to fix the issue and deploy before anything catastrophic happened.</p>
+
+<p>Next, SSH back into your server.</p>
+
+<p>Run the following commands to restart Nginx and PHP-FPM.</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo /etc/init.d/nginx restart
+sudo /etc/init.d/php-fpm restart</code></pre></div>
+
+<blockquote>
+  <p>You do not need to restart Nginx after every deployment. Additionally, you can make restarting PHP-FPM as part of the deployment process using a Capistrano task.</p>
+</blockquote>
+
+<p>Congratulations! The Expert PHP Deployments Application is now live!</p>
+
+<h2 id="in-this-chapter-4">In This Chapter</h2>
+<p>In this chapter, you learned how to build and secure a Linux server from scratch. Additionally, you learned how to deploy your application using Capistrano and Phing.</p>
+
+<p>You are now an expert at deploying PHP applications!</p>
+
+<h1 id="wrapping-up-1">6. Wrapping Up</h1>
+
+<p>Knowing how to properly deploy PHP applications is an important tool in your toolbox that sadly many developers never take the time to learn.</p>
+
+<p>Understanding how a server is configured and runs will also make you a better developer as you will be more aware of how your application affects the system it runs on.</p>
+
+<p>As I said in the introduction, it is my sincere hope that you learned a lot from this book and you can immediately put the tools and techniques into practice. I hope that you are now a better programmer and are able to pass on your knowledge to junior developers.</p>
+
+<p>Vic Cherubini — <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#118;&#105;&#099;&#064;&#108;&#101;&#102;&#116;&#110;&#111;&#100;&#101;&#046;&#111;&#114;&#103;">&#118;&#105;&#099;&#064;&#108;&#101;&#102;&#116;&#110;&#111;&#100;&#101;&#046;&#111;&#114;&#103;</a></p>
+
+    </article>
+</div>
+
+        </div>
+
+        <footer>
+    <p>&copy; 2014 Vic Cherubini</p>
+</footer>
+
+    </div>
+</body>
+</html>
